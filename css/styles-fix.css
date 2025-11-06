@@ -1,0 +1,347 @@
+/* ============================================================
+   💠 FINANZAS PRO v3.2 — Estilos globales de login y PIN
+   ============================================================
+   Incluye:
+   ▸ Fondo degradado azul–cian con halo radial
+   ▸ Animación del logo en inicio
+   ▸ Blur semitransparente para pantalla de PIN
+   ▸ Detalles visuales mejorados y listos para escalado
+   ============================================================ */
+
+:root {
+  /* Colores base de marca */
+  --login-bg-start: #0d47a1;   /* Azul profundo */
+  --login-bg-end: #00d4ff;     /* Cian vibrante */
+  --login-card-bg: #ffffff;
+  --login-text: #0f172a;
+  --login-muted: #64748b;
+  --google-border: #dadce0;
+}
+
+/* ============================================================
+   🟦 LOGIN SCREEN PRINCIPAL
+   ============================================================ */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  display: none; /* visible cuando se monta desde login-bootstrap.js */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+
+  /* Fondo degradado + halo central */
+  background:
+    radial-gradient(circle at center,
+      rgba(255,255,255,0.15) 0%,
+      rgba(255,255,255,0.05) 30%,
+      var(--login-bg-start) 100%),
+    linear-gradient(135deg, var(--login-bg-start) 0%, var(--login-bg-end) 100%);
+  background-blend-mode: overlay;
+}
+
+/* ============================================================
+   🧩 TARJETA DE LOGIN
+   ============================================================ */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--login-card-bg);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.25);
+  padding: 28px;
+  text-align: center;
+  animation: loginFade 260ms ease;
+}
+
+@keyframes loginFade {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================
+   🌀 LOGO
+   ============================================================ */
+.login-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 12px auto;
+  border-radius: 24px;
+  background: #0ea5e9; /* tono intermedio entre azul y cian */
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 800;
+  font-size: 28px;
+  box-shadow: 0 8px 24px rgba(14,165,233,.35);
+  animation: logoFade 0.4s ease-out;
+}
+
+@keyframes logoFade {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.login-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 24px;
+}
+
+/* ============================================================
+   🪶 TEXTOS PRINCIPALES
+   ============================================================ */
+.login-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--login-text);
+  margin: 8px 0 2px 0;
+}
+.login-subtitle {
+  font-size: .95rem;
+  color: var(--login-muted);
+  margin-bottom: 18px;
+}
+
+/* ============================================================
+   ✏️ FORMULARIO DE LOGIN
+   ============================================================ */
+.login-form .input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  background: #fafafa;
+  transition: border-color .2s ease;
+}
+.login-form .input:focus {
+  border-color: var(--login-bg-end);
+  outline: none;
+}
+
+/* Botón principal de login */
+.login-btn {
+  width: 100%;
+  border: none;
+  background: #0ea5e9;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .06s ease;
+  box-shadow: 0 8px 16px rgba(14,165,233,.25);
+}
+.login-btn:hover   { transform: translateY(-1px); }
+.login-btn:active  { transform: translateY(0); }
+
+.login-link {
+  margin-top: 8px;
+  font-size: .95rem;
+  color: #0369a1;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Separador visual ("o") */
+.login-sep {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: .9rem;
+  margin: 14px 0;
+}
+.login-sep::before,
+.login-sep::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+/* ============================================================
+   🔵 BOTÓN DE GOOGLE
+   ============================================================ */
+.login-google {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--google-border);
+  color: #3c4043;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.login-google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+.login-google .g-icon {
+  width: 18px;
+  height: 18px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><path fill=%22%23FFC107%22 d=%22M43.6 20.5H42V20H24v8h11.3C33.6 31.7 29.3 35 24 35c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.1-2.7-.4-3.5z%22/><path fill=%22%23FF3D00%22 d=%22M6.3 14.7l6.6 4.8C14.3 16.2 18.8 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 5.1 29.5 3 24 3 16.1 3 9.2 7.1 6.3 14.7z%22/><path fill=%22%234CAF50%22 d=%22M24 45c5.2 0 10-1.8 13.7-4.9l-6.3-5.2C29.4 36.6 26.8 37 24 37c-5.2 0-9.6-3.5-11.7-8.5l-6.6 5.1C9.2 40.9 16.1 45 24 45z%22/><path fill=%22%232196F3%22 d=%22M43.6 20.5H42V20H24v8h11.3c-1.2 3.7-4.7 7-11.3 7-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 5.1 29.5 3 24 3c-11.6 0-21 9.4-21 21s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.1-2.7-.4-3.5z%22/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* ============================================================
+   🖐️ BOTÓN DE BIOMETRÍA
+   ============================================================ */
+.login-bio {
+  margin-top: 10px;
+  width: 100%;
+  border: 1px dashed #94a3b8;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.login-bio:hover {
+  background: #e2e8f0;
+}
+
+/* Pie de tarjeta */
+.login-foot {
+  margin-top: 14px;
+  color: #94a3b8;
+  font-size: .85rem;
+}
+
+/* ============================================================
+   🔐 PANTALLA DE PIN
+   ============================================================ */
+#pinScreen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(2,6,23,.5);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  padding: 24px;
+}
+
+/* (Futuro) estilo responsivo para escritorio grande */
+@media (min-width: 768px) {
+  .login-card { max-width: 480px; padding: 32px; }
+  .login-title { font-size: 1.8rem; }
+}
+
+/* (Futuro) soporte para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  #loginScreen {
+    --login-card-bg: #1e293b;
+    --login-text: #f1f5f9;
+    --login-muted: #94a3b8;
+  }
+}
+
+/* ============================================================
+📊 SECCIÓN INFORMES — Finanzas Pro v3.2
+Gráficos visuales (torta y barras) integrados con Chart.js
+============================================================ */
+
+/* Contenedor general del tab */
+#tab-informes {
+  animation: fadeIn 0.25s ease;
+}
+
+/* Banner informativo (idéntico estilo al resto) */
+#tab-informes .info-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(90deg, #0d47a1, #00d4ff);
+  color: white;
+  padding: 16px 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-bottom: 18px;
+}
+
+#tab-informes .info-banner h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+#tab-informes .info-banner p {
+  margin: 2px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Sección de gráficos */
+#tab-informes .section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 10px;
+}
+
+/* Contenedor de los gráficos */
+#tab-informes .charts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Tarjetas individuales de cada gráfico */
+#tab-informes .chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  max-width: 520px;
+  width: 100%;
+}
+
+#tab-informes .chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+}
+
+#tab-informes .chart-card h4 {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+  #tab-informes .charts {
+    flex-direction: column;
+    align-items: center;
+  }
+  #tab-informes .chart-card {
+    max-width: 100%;
+  }
+}
+
+/* Animación de aparición suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
