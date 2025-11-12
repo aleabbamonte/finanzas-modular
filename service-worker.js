@@ -1,11 +1,11 @@
-const CACHE_NAME = 'finanzas-pro-v3.0';
+const CACHE_NAME = 'finanzas-pro-v3.1';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './logo-192.png',
-  './logo-512.png',
-  './logo.png'
+  './img/logo-512.png',
+  './img/logo-192.png',
+  './img/logo.png'
 ];
 
 // Instalación del service worker
