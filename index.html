@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <meta name="theme-color" content="#00796b">
+  <title>Finanzas Pro | Auratech</title>
+  <link rel="manifest" href="./manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/styles-fix.css">
+</head>
+<body>
+
+    <!-- Pantalla de PIN -->
+    <div id="pinScreen" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #031a30 0%, #031422 100%); justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="font-size: 60px; margin-bottom: 20px;">🔐</div>
+            <h2 id="pinTitle" style="color: #031a30; margin-bottom: 10px; font-size: 24px;">Configura tu PIN</h2>
+            <p id="pinSubtitle" style="color: #757575; margin-bottom: 30px; font-size: 14px;">Crea un PIN de 4 dígitos para proteger tus datos</p>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
+                <div class="pin-dot" style="width: 20px; height: 20px; border-radius: 50%; border: 3px solid #031a30; transition: all 0.3s;"></div>
+                <div class="pin-dot" style="width: 20px; height: 20px; border-radius: 50%; border: 3px solid #031a30; transition: all 0.3s;"></div>
+                <div class="pin-dot" style="width: 20px; height: 20px; border-radius: 50%; border: 3px solid #031a30; transition: all 0.3s;"></div>
+                <div class="pin-dot" style="width: 20px; height: 20px; border-radius: 50%; border: 3px solid #031a30; transition: all 0.3s;"></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 300px; margin: 0 auto;">
+                <button class="pin-btn" onclick="pinManager.addDigit(1)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">1</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(2)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">2</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(3)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">3</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(4)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">4</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(5)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">5</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(6)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">6</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(7)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">7</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(8)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">8</button>
+                <button class="pin-btn" onclick="pinManager.addDigit(9)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">9</button>
+                <button style="padding: 20px; background: transparent; border: none;"></button>
+                <button class="pin-btn" onclick="pinManager.addDigit(0)" style="padding: 20px; font-size: 24px; font-weight: 700; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">0</button>
+                <button class="pin-btn" onclick="pinManager.deleteDigit()" style="padding: 20px; font-size: 20px; background: #f5f5f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s;">⌫</button>
+            </div>
+            
+            <p id="pinError" style="color: #c62828; margin-top: 20px; font-size: 14px; min-height: 20px;"></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="https://i.postimg.cc/26fQFHJ8/logo.png" class="logo" alt="Finanzas Pro Logo">
+            </div>
+            <div class="brand">
+                <h1>FINANZAS PRO</h1>
+                <p class="tagline">by Auratech™</p>
+            </div>
+        </div>
+        
+        <div class="tabs" id="tabsContainer"></div>
+        <div id="subtabsContainer"></div>
+        
+        <div class="content">
+            <!-- RESUMEN -->
+            <div id="tab-resumen" class="tab-content active">
+                <div class="info-banner">
+                    <div>💡</div>
+                    <div>
+			<h3>Panel de Control</h3>
+				<p>
+				<strong>Aquí ves tu panorama financiero:</strong><br>
+				<strong>🗂️ Tarjetas de datos:</strong> Ingresos, gastos por tipo (Fijos, Variables, Tarjetas, Préstamos) y balance mensual.<br>
+				<strong>📊 Distribución de Gastos:</strong> Compara visualmente tus gastos (Fijos, Variables y Cuotas) con barras proporcionales y porcentajes.<br>
+				<strong>💵 Campo USD:</strong> Actualiza el tipo de cambio automáticamente o manual; convierte todos los montos a dólares.<br>
+				<strong>🔔 Alertas Inteligentes:</strong> Notificaciones sobre situaciones importantes en tus finanzas.
+				</p>
+			</div>
+                </div>
+                
+				<div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <!-- Fila 1: Mes y Año -->
+                    <div style="display: flex; gap: 8px;">
+                        <select id="mesActual" onchange="app.actualizar()" style="flex: 1;"></select>
+                        <select id="anioActual" onchange="app.actualizar()" style="flex: 1;"></select>
+                    </div>
+                    
+                    <!-- Fila 2: USD y botón ? -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <div style="display: flex; gap: 6px; align-items: center; background: var(--bg-alt); padding: 6px 10px; border-radius: 8px; border: 2px solid var(--border); flex: 1;">
+                            <span style="font-size: 16px;">💵</span>
+                            <label style="font-size: 13px; font-weight: 600; color: var(--text);">USD:</label>
+                            <input type="number" id="tipoCambio" placeholder="0" step="0.01" onchange="app.guardarTipoCambio()" style="flex: 1; padding: 4px 6px; border: 1px solid var(--border); height: 30px; font-size: 14px; box-sizing: border-box;" title="Tipo de cambio USD a ARS">
+                            <button class="btn" onclick="app.actualizarDolar()" style="padding: 0 !important; background: var(--primary) !important; color: white; font-size: 14px; height: 30px !important; width: 30px !important; display: flex !important; align-items: center !important; justify-content: center !important; border: none !important; min-height: unset !important; margin: 0 !important;" title="Actualizar cotización">🔄</button>
+                        </div>
+                        <button class="btn" onclick="app.mostrarAyuda()" style="background: #757575; color: white; padding: 6px 8px; width: 75px; display: flex; justify-content: center; align-items: center; font-size: 18px; min-height: unset !important; margin: 0 !important; height: 42px;">❓</button>
+                    </div>
+                    
+                    <!-- Fila 3: Exportar e Importar -->
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn" onclick="app.exportar()" style="flex: 1; background: #757575; color: white; padding: 10px; min-height: unset !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px;">📥 Exportar</button>
+						<button class="btn" onclick="document.getElementById('importFile').click()" style="flex: 1; background: #757575; color: white; padding: 10px; min-height: unset !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px;">📤 Importar</button>
+                    </div>
+                    
+                    <input type="file" id="importFile" style="display:none" accept=".json" onchange="app.importar(event)">
+                </div>
+                
+                <div class="cards" id="resumenCards"></div>
+                
+                <div class="section">
+                    <div class="section-title">📊 Distribución de Gastos</div>
+                    <div class="expense-grid" id="desglose"></div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">🔔 Alertas Inteligentes</div>
+                    <div id="alertas"></div>
+                </div>
+            </div>
+            
+            <!-- GESTIÓN - INGRESOS -->
+            <div id="tab-gestion-ingresos" class="tab-content">
+                <div class="info-banner">
+                    <div>💵</div>
+                    <div><h3>Ingresos</h3><p>💡 <strong>Cómo usar:</strong> Completa todos los campos y haz clic en "+ Agregar".<br> 
+					</strong>Puedes registrar ingresos en ARS o USD.<br>
+					</strong>El color te ayuda a identificar visualmente cada tipo de ingreso.</p></div>
+                </div>
+                <div class="section">
+                    <div class="form-grid">
+                        <input type="text" id="ing-nombre" placeholder="Nombre">
+                        <select id="ing-cat"></select>
+                        <select id="ing-moneda" title="Si el ingreso es en dólares, se convertirá automáticamente a pesos usando el tipo de cambio configurado">
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                        </select>
+                        <input type="text" id="ing-monto" placeholder="Monto" step="0.01">
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text);">Color:</label>
+                            <div class="color-picker">
+                                <div class="color-option selected" style="background: #2e7d32;" onclick="app.seleccionarColor('ing', '#2e7d32', event)" title="Verde"></div>
+                                <div class="color-option" style="background: #388e3c;" onclick="app.seleccionarColor('ing', '#388e3c', event)" title="Verde Medio"></div>
+                                <div class="color-option" style="background: #689f38;" onclick="app.seleccionarColor('ing', '#689f38', event)" title="Verde Lima"></div>
+                                <div class="color-option" style="background: #1976d2;" onclick="app.seleccionarColor('ing', '#1976d2', event)" title="Azul"></div>
+                                <div class="color-option" style="background: #1565c0;" onclick="app.seleccionarColor('ing', '#1565c0', event)" title="Azul Oscuro"></div>
+                                <div class="color-option" style="background: #0097a7;" onclick="app.seleccionarColor('ing', '#0097a7', event)" title="Cian"></div>
+                                <div class="color-option" style="background: #00796b;" onclick="app.seleccionarColor('ing', '#00796b', event)" title="Verde Azulado"></div>
+                                <div class="color-option" style="background: #7b1fa2;" onclick="app.seleccionarColor('ing', '#7b1fa2', event)" title="Morado"></div>
+                                <div class="color-option" style="background: #5e35b1;" onclick="app.seleccionarColor('ing', '#5e35b1', event)" title="Violeta"></div>
+                                <div class="color-option" style="background: #f57c00;" onclick="app.seleccionarColor('ing', '#f57c00', event)" title="Naranja"></div>
+                                <div class="color-option" style="background: #fb8c00;" onclick="app.seleccionarColor('ing', '#fb8c00', event)" title="Naranja Claro"></div>
+                                <div class="color-option" style="background: #fbc02d;" onclick="app.seleccionarColor('ing', '#fbc02d', event)" title="Amarillo"></div>
+                                <div class="color-option" style="background: #fdd835;" onclick="app.seleccionarColor('ing', '#fdd835', event)" title="Amarillo Claro"></div>
+                                <div class="color-option" style="background: #c2185b;" onclick="app.seleccionarColor('ing', '#c2185b', event)" title="Rosa"></div>
+                                <div class="color-option" style="background: #d32f2f;" onclick="app.seleccionarColor('ing', '#d32f2f', event)" title="Rojo"></div>
+                                <div class="color-option" style="background: #455a64;" onclick="app.seleccionarColor('ing', '#455a64', event)" title="Gris"></div>
+                                <div class="color-option" style="background: #6d4c41;" onclick="app.seleccionarColor('ing', '#6d4c41', event)" title="Marrón"></div>
+                                <div class="color-custom" onclick="document.getElementById('ing-color-custom').click()">🎨 Personalizado</div>
+                                <input type="color" id="ing-color-custom" style="display: none;" onchange="app.seleccionarColor('ing', this.value, event)">
+                            </div>
+                            <input type="hidden" id="ing-color" value="#2e7d32">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.add('ing')" style="grid-column: 1 / -1;">+ Agregar</button>
+                    </div>
+                    <div class="item-list" id="lista-ing"></div>
+                </div>
+            </div>
+            
+            <!-- GESTIÓN - GASTOS FIJOS -->
+            <div id="tab-gestion-fijos" class="tab-content">
+                <div class="info-banner">
+                    <div>🏠</div>
+                    <div><h3>Gastos Fijos</h3><p>💡 <strong>Cómo usar:</strong> Registra gastos que se repiten cada mes (alquiler, servicios, suscripciones).<br>
+					</strong>Puedes usar USD si pagas en dólares.<br>
+					</strong>Una vez guardados, se mostrarán en el resumen mensual.</p></div>
+                </div>
+                <div class="section">
+                    <div class="form-grid">
+                        <input type="text" id="fij-nombre" placeholder="Nombre">
+                        <select id="fij-cat"></select>
+                        <select id="fij-moneda" title="Si el gasto es en dólares, se convertirá automáticamente a pesos usando el tipo de cambio configurado">
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                        </select>
+                        <input type="text" id="fij-monto" placeholder="Monto" step="0.01">
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text);">Color:</label>
+                            <div class="color-picker">
+                                <div class="color-option" style="background: #d32f2f;" onclick="app.seleccionarColor('fij', '#d32f2f', event)" title="Rojo"></div>
+                                <div class="color-option selected" style="background: #c62828;" onclick="app.seleccionarColor('fij', '#c62828', event)" title="Rojo Oscuro"></div>
+                                <div class="color-option" style="background: #e64a19;" onclick="app.seleccionarColor('fij', '#e64a19', event)" title="Naranja Oscuro"></div>
+                                <div class="color-option" style="background: #f57c00;" onclick="app.seleccionarColor('fij', '#f57c00', event)" title="Naranja"></div>
+                                <div class="color-option" style="background: #fb8c00;" onclick="app.seleccionarColor('fij', '#fb8c00', event)" title="Naranja Claro"></div>
+                                <div class="color-option" style="background: #7b1fa2;" onclick="app.seleccionarColor('fij', '#7b1fa2', event)" title="Morado"></div>
+                                <div class="color-option" style="background: #5e35b1;" onclick="app.seleccionarColor('fij', '#5e35b1', event)" title="Violeta"></div>
+                                <div class="color-option" style="background: #c2185b;" onclick="app.seleccionarColor('fij', '#c2185b', event)" title="Rosa"></div>
+                                <div class="color-option" style="background: #ad1457;" onclick="app.seleccionarColor('fij', '#ad1457', event)" title="Rosa Oscuro"></div>
+                                <div class="color-option" style="background: #1976d2;" onclick="app.seleccionarColor('fij', '#1976d2', event)" title="Azul"></div>
+                                <div class="color-option" style="background: #1565c0;" onclick="app.seleccionarColor('fij', '#1565c0', event)" title="Azul Oscuro"></div>
+                                <div class="color-option" style="background: #0097a7;" onclick="app.seleccionarColor('fij', '#0097a7', event)" title="Cian"></div>
+                                <div class="color-option" style="background: #00796b;" onclick="app.seleccionarColor('fij', '#00796b', event)" title="Verde Azulado"></div>
+                                <div class="color-option" style="background: #fbc02d;" onclick="app.seleccionarColor('fij', '#fbc02d', event)" title="Amarillo"></div>
+                                <div class="color-option" style="background: #fdd835;" onclick="app.seleccionarColor('fij', '#fdd835', event)" title="Amarillo Claro"></div>
+                                <div class="color-option" style="background: #455a64;" onclick="app.seleccionarColor('fij', '#455a64', event)" title="Gris"></div>
+                                <div class="color-option" style="background: #6d4c41;" onclick="app.seleccionarColor('fij', '#6d4c41', event)" title="Marrón"></div>
+                                <div class="color-custom" onclick="document.getElementById('fij-color-custom').click()">🎨 Personalizado</div>
+                                <input type="color" id="fij-color-custom" style="display: none;" onchange="app.seleccionarColor('fij', this.value, event)">
+                            </div>
+                            <input type="hidden" id="fij-color" value="#c62828">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.add('fij')" style="grid-column: 1 / -1;">+ Agregar</button>
+                    </div>
+                    <div class="item-list" id="lista-fij"></div>
+                </div>
+            </div>
+            
+            <!-- GESTIÓN - GASTOS VARIABLES -->
+            <div id="tab-gestion-variables" class="tab-content">
+                <div class="info-banner">
+                    <div>🛒</div>
+                    <div><h3>Gastos Variables</h3><p>💡 <strong>Cómo usar:</strong> Registra gastos que cambian mes a mes (comida, transporte, entretenimiento).<br>
+					</strong>Elige la categoría correcta para que la app pueda comparar con tus presupuestos.<br>
+					</strong>Los montos en USD se convierten automáticamente.</p></div>
+                </div>
+                <div class="section">
+                    <div class="form-grid">
+                        <input type="text" id="var-nombre" placeholder="Nombre">
+                        <select id="var-cat"></select>
+                        <select id="var-moneda" title="Si el gasto es en dólares, se convertirá automáticamente a pesos usando el tipo de cambio configurado">
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                        </select>
+                        <input type="text" id="var-monto" placeholder="Monto" step="0.01">
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text);">Color:</label>
+                            <div class="color-picker">
+                                <div class="color-option selected" style="background: #f57c00;" onclick="app.seleccionarColor('var', '#f57c00', event)" title="Naranja"></div>
+                                <div class="color-option" style="background: #e64a19;" onclick="app.seleccionarColor('var', '#e64a19', event)" title="Naranja Oscuro"></div>
+                                <div class="color-option" style="background: #fb8c00;" onclick="app.seleccionarColor('var', '#fb8c00', event)" title="Naranja Claro"></div>
+                                <div class="color-option" style="background: #fbc02d;" onclick="app.seleccionarColor('var', '#fbc02d', event)" title="Amarillo"></div>
+                                <div class="color-option" style="background: #fdd835;" onclick="app.seleccionarColor('var', '#fdd835', event)" title="Amarillo Claro"></div>
+                                <div class="color-option" style="background: #689f38;" onclick="app.seleccionarColor('var', '#689f38', event)" title="Verde Lima"></div>
+                                <div class="color-option" style="background: #0097a7;" onclick="app.seleccionarColor('var', '#0097a7', event)" title="Cian"></div>
+                                <div class="color-option" style="background: #00796b;" onclick="app.seleccionarColor('var', '#00796b', event)" title="Verde Azulado"></div>
+                                <div class="color-option" style="background: #1976d2;" onclick="app.seleccionarColor('var', '#1976d2', event)" title="Azul"></div>
+                                <div class="color-option" style="background: #1565c0;" onclick="app.seleccionarColor('var', '#1565c0', event)" title="Azul Oscuro"></div>
+                                <div class="color-option" style="background: #7b1fa2;" onclick="app.seleccionarColor('var', '#7b1fa2', event)" title="Morado"></div>
+                                <div class="color-option" style="background: #5e35b1;" onclick="app.seleccionarColor('var', '#5e35b1', event)" title="Violeta"></div>
+                                <div class="color-option" style="background: #c2185b;" onclick="app.seleccionarColor('var', '#c2185b', event)" title="Rosa"></div>
+                                <div class="color-option" style="background: #ad1457;" onclick="app.seleccionarColor('var', '#ad1457', event)" title="Rosa Oscuro"></div>
+                                <div class="color-option" style="background: #d32f2f;" onclick="app.seleccionarColor('var', '#d32f2f', event)" title="Rojo"></div>
+                                <div class="color-option" style="background: #c62828;" onclick="app.seleccionarColor('var', '#c62828', event)" title="Rojo Oscuro"></div>
+                                <div class="color-option" style="background: #455a64;" onclick="app.seleccionarColor('var', '#455a64', event)" title="Gris"></div>
+                                <div class="color-option" style="background: #6d4c41;" onclick="app.seleccionarColor('var', '#6d4c41', event)" title="Marrón"></div>
+                                <div class="color-custom" onclick="document.getElementById('var-color-custom').click()">🎨 Personalizado</div>
+                                <input type="color" id="var-color-custom" style="display: none;" onchange="app.seleccionarColor('var', this.value, event)">
+                            </div>
+                            <input type="hidden" id="var-color" value="#f57c00">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.add('var')" style="grid-column: 1 / -1;">+ Agregar</button>
+                    </div>
+                    <div class="item-list" id="lista-var"></div>
+                </div>
+            </div>
+            
+            <!-- GESTIÓN - TARJETAS -->
+            <div id="tab-gestion-tarjetas" class="tab-content">
+                <div class="info-banner">
+                    <div>💳</div>
+                    <div><h3>Gestión de Tarjetas</h3><p>💡 <strong>Cómo usar:</strong> <br>• <strong>Compra Nueva:</strong> Si acabas de hacer la compra, ingresa el monto total, cuotas y fecha.<br>
+					</strong>El sistema calculará todo automáticamente.<br>• <strong>Compra Antigua:</strong> Si ya pagaste algunas cuotas, ingresa el valor de cada cuota y en qué cuota estás.<br>
+					</strong>Haz clic en "✓ Pagar" cada vez que abonas una cuota.</p></div>
+                </div>
+
+                <div class="section">
+                    <div class="card-mode-switch">
+                        <button class="mode-btn active" onclick="app.cambiarModoTarjeta('completo')" title="Usa este modo si acabas de hacer la compra y conoces el monto total">
+                            📋 Compra Nueva
+                        </button>
+                        <button class="mode-btn" onclick="app.cambiarModoTarjeta('rapido')" title="Usa este modo si ya pagaste algunas cuotas y solo sabes el valor de cada cuota">
+                            ⚡ Compra Antigua
+                        </button>
+                    </div>
+
+                    <!-- Modo Completo -->
+                    <div id="tarjetaModoCompleto">
+                        <div class="form-grid">
+                            <input type="text" id="tarjeta-nombre" placeholder="Nombre de la compra">
+                            <input type="text" id="tarjeta-tarjeta" placeholder="Nombre de tarjeta">
+                            <input type="text" id="tarjeta-monto" placeholder="Monto total" step="0.01">
+                            <input type="number" id="tarjeta-cuotas" placeholder="Total cuotas" min="1">
+                            <input type="date" id="tarjeta-fecha">
+                            <button class="btn btn-primary" onclick="app.agregarTarjetaCompleto()">+ Agregar</button>
+                        </div>
+                    </div>
+
+                    <!-- Modo Rápido -->
+                    <div id="tarjetaModoRapido" style="display: none;">
+                        <div class="form-grid">
+                            <input type="text" id="tarjeta-nombre-rapido" placeholder="Nombre de la compra">
+                            <input type="text" id="tarjeta-tarjeta-rapido" placeholder="Nombre de tarjeta">
+                            <input type="text" id="tarjeta-cuota-rapido" placeholder="Valor cuota" step="0.01">
+                            <input type="number" id="tarjeta-cuotas-rapido" placeholder="Total cuotas" min="1">
+                            <input type="number" id="tarjeta-actual-rapido" placeholder="Cuota actual" min="1">
+                            <button class="btn btn-primary" onclick="app.agregarTarjetaRapido()">+ Agregar</button>
+                        </div>
+                    </div>
+
+                    <div id="listaTarjetas" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- GESTIÓN - PRÉSTAMOS -->
+            <div id="tab-gestion-prestamos" class="tab-content">
+                <div class="info-banner">
+                    <div>🏦</div>
+                    <div><h3>Gestión de Préstamos</h3><p>💡 <strong>Cómo usar:</strong> <br>• <strong>Préstamo Nuevo:</strong> Para préstamos recientes, ingresa el monto total y cantidad de cuotas.<br>• <strong>Préstamo Antiguo:</strong> Si ya comenzaste a pagarlo, ingresa el valor de la cuota y en cuál estás.<br>
+					</strong>El sistema calculará automáticamente cuánto debes y las cuotas mensuales.</p></div>
+                </div>
+
+                <div class="section">
+                    <div class="card-mode-switch">
+                        <button class="mode-btn active" onclick="app.cambiarModoPrestamo('completo')" title="Usa este modo si acabas de solicitar el préstamo y conoces el monto total">
+                            📋 Préstamo Nuevo
+                        </button>
+                        <button class="mode-btn" onclick="app.cambiarModoPrestamo('rapido')" title="Usa este modo si ya pagaste algunas cuotas y solo sabes el valor de cada cuota">
+                            ⚡ Préstamo Antiguo
+                        </button>
+                    </div>
+
+                    <!-- Modo Completo -->
+                    <div id="prestamoModoCompleto">
+                        <div class="form-grid">
+                            <input type="text" id="prestamo-nombre" placeholder="Nombre del préstamo">
+							<select id="prestamo-tipo">
+							<option value="" disabled selected>Tipo de préstamo</option>
+							<option value="personal">💼 Personal</option>
+							<option value="hipotecario">🏠 Hipotecario</option>
+							<option value="financiera">🏦 Financiera</option>
+							<option value="familiar">👨‍👩‍👧 Familiar</option>
+							<option value="amigo">🤝 Amigo</option>
+							<option value="otro">💰 Otro</option>
+							</select>
+                            <input type="text" id="prestamo-monto" placeholder="Monto total" step="0.01">
+                            <input type="number" id="prestamo-cuotas" placeholder="Total cuotas" min="1">
+                            <input type="date" id="prestamo-fecha">
+                            <button class="btn btn-primary" onclick="app.agregarPrestamoCompleto()">+ Agregar</button>
+                        </div>
+                    </div>
+
+                    <!-- Modo Rápido -->
+                    <div id="prestamoModoRapido" style="display: none;">
+                        <div class="form-grid">
+                            <input type="text" id="prestamo-nombre-rapido" placeholder="Nombre del préstamo">
+							<select id="prestamo-tipo-rapido">
+							<option value="" disabled selected>Tipo de préstamo</option>
+							<option value="personal">💼 Personal</option>
+							<option value="hipotecario">🏠 Hipotecario</option>
+							<option value="financiera">🏦 Financiera</option>
+							<option value="familiar">👨‍👩‍👧 Familiar</option>
+							<option value="amigo">🤝 Amigo</option>
+							<option value="otro">💰 Otro</option>
+							</select>
+                            <input type="text" id="prestamo-cuota-rapido" placeholder="Valor cuota" step="0.01">
+                            <input type="number" id="prestamo-cuotas-rapido" placeholder="Total cuotas" min="1">
+                            <input type="number" id="prestamo-actual-rapido" placeholder="Cuota actual" min="1">
+                            <button class="btn btn-primary" onclick="app.agregarPrestamoRapido()">+ Agregar</button>
+                        </div>
+                    </div>
+
+                    <div id="listaPrestamos" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- METAS - AHORROS -->
+            <div id="tab-metas-ahorros" class="tab-content">
+                <div class="info-banner">
+                    <div>🐷</div>
+                    <div><h3>Metas de Ahorro</h3><p>💡 <strong>Cómo usar:</strong> Primero establece una <strong>Meta</strong> (ej: "Vacaciones - $500.000").<br>
+					</strong>Luego registra cada <strong>Ahorro</strong> que hagas.<br>
+					</strong>La barra de progreso te mostrará cuánto te falta para alcanzar tu objetivo.<br>
+					</strong>¡Puedes tener múltiples metas!</p></div>
+                </div>
+                <div class="section">
+                    <div class="form-grid">
+                        <input type="text" id="meta-nombre" placeholder="Meta">
+                        <input type="text" id="meta-monto" placeholder="Objetivo $" step="0.01">
+                        <button class="btn btn-primary" onclick="app.addMeta()">Establecer</button>
+                    </div>
+                    <div class="form-grid" style="margin-top:10px;">
+                        <input type="text" id="aho-nombre" placeholder="Ahorro realizado">
+                        <input type="text" id="aho-monto" placeholder="Monto $" step="0.01">
+                        <button class="btn btn-success" onclick="app.addAhorro()">Registrar</button>
+                    </div>
+                    <div class="item-list" id="lista-aho"></div>
+                    <div id="progresoAhorro" style="margin-top:15px;"></div>
+                </div>
+            </div>
+            
+            <!-- METAS - PRESUPUESTOS -->
+            <div id="tab-metas-presupuestos" class="tab-content">
+                <div class="info-banner">
+                    <div>🎯</div>
+                    <div><h3>Presupuestos por Categoría</h3><p>💡 <strong>Cómo usar:</strong> Define límites de gasto para cada categoría (ej: "Alimentación - $200.000").<br>
+					</strong>La app comparará automáticamente tus <strong>Gastos Variables</strong> registrados con estos límites y te alertará si te estás pasando.<br>
+					</strong>¡Te ayuda a controlar mejor tus finanzas!</p></div>
+                </div>
+                <div class="section">
+                    <div class="form-grid">
+                        <select id="pres-cat"></select>
+                        <input type="text" id="pres-monto" placeholder="Límite $" step="0.01">
+                        <button class="btn btn-primary" onclick="app.addPresupuesto()">Establecer</button>
+                    </div>
+                    <div id="listaPresupuestos" style="margin-top:15px;"></div>
+                </div>
+            </div>
+            
+            <!-- HISTORIAL -->
+            <div id="tab-historial" class="tab-content">
+                <div class="info-banner">
+                    <div>📜</div>
+                    <div><h3>Historial de Actividad</h3><p>Registro automático de todas tus operaciones con fecha y hora.</p></div>
+                </div>
+                <div class="section">
+                    <div id="listaHistorial"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Modal Ayuda -->
+    <div id="modalAyuda" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Bienvenido a Finanzas Pro<br><small style="font-size:16px;font-weight:400;color:var(--text-light);">by Auratech™</small></div>
+            <div class="modal-body">
+                <p><strong>Tu asistente financiero profesional:</strong></p>
+                <ul>
+                    <li>📊 Visualiza tu situación financiera en tiempo real</li>
+                    <li>💰 Controla ingresos, gastos fijos y variables</li>
+                    <li>💳 Gestiona compras en cuotas y préstamos</li>
+                    <li>🎯 Define metas de ahorro y presupuestos</li>
+                    <li>📈 Proyecta tu futuro financiero</li>
+                    <li>🔔 Recibe alertas inteligentes personalizadas</li>
+                    <li>💵 Registra gastos en USD convertidos automáticamente a ARS</li>
+                </ul>
+                <p><strong>💡 Consejos:</strong></p>
+                <ul>
+                    <li>Actualiza el tipo de cambio USD en el panel de Resumen</li>
+                    <li>Exporta tus datos regularmente como respaldo</li>
+                    <li>Revisa las alertas para mantener finanzas saludables</li>
+                    <li>Usa la proyección para planificar a futuro</li>
+                </ul>
+                <p style="text-align:center;color:var(--primary);font-weight:600;margin-top:18px;">Tu éxito financiero comienza aquí</p>
+            </div>
+            <button class="btn btn-primary" onclick="app.cerrarAyuda()" style="display:block;margin:20px auto 0;padding:12px 32px;">Comenzar</button>
+        </div>
+    </div>
+    
+    <script>
+        // ========== SISTEMA DE PIN ==========
+        const pinManager = {
+            currentPin: '',
+            storedPin: null,
+            confirmPin: '',
+            mode: 'setup', // 'setup', 'confirm', 'login'
+            
+            init() {
+                // Verificar si ya existe un PIN
+                this.storedPin = localStorage.getItem('app_pin');
+                
+                if (this.storedPin) {
+                    // Ya tiene PIN, mostrar pantalla de login
+                    this.mode = 'login';
+                    document.getElementById('pinTitle').textContent = 'Ingresa tu PIN';
+                    document.getElementById('pinSubtitle').textContent = 'Desbloquea tu app financiera';
+                } else {
+                    // Primera vez, configurar PIN
+                    this.mode = 'setup';
+                    document.getElementById('pinTitle').textContent = 'Configura tu PIN';
+                    document.getElementById('pinSubtitle').textContent = 'Crea un PIN de 4 dígitos para proteger tus datos';
+                }
+            },
+            
+            addDigit(digit) {
+                if (this.currentPin.length < 4) {
+                    this.currentPin += digit;
+                    this.updateDots();
+                    
+                    if (this.currentPin.length === 4) {
+                        setTimeout(() => this.processPin(), 300);
+                    }
+                }
+            },
+            
+            deleteDigit() {
+                this.currentPin = this.currentPin.slice(0, -1);
+                this.updateDots();
+                document.getElementById('pinError').textContent = '';
+            },
+            
+            updateDots() {
+                const dots = document.querySelectorAll('.pin-dot');
+                dots.forEach((dot, index) => {
+                    if (index < this.currentPin.length) {
+                        dot.classList.add('filled');
+                    } else {
+                        dot.classList.remove('filled');
+                    }
+                });
+            },
+            
+            processPin() {
+                if (this.mode === 'setup') {
+                    // Guardar PIN y pedir confirmación
+                    this.confirmPin = this.currentPin;
+                    this.currentPin = '';
+                    this.mode = 'confirm';
+                    document.getElementById('pinTitle').textContent = 'Confirma tu PIN';
+                    document.getElementById('pinSubtitle').textContent = 'Ingresa nuevamente el PIN';
+                    this.updateDots();
+                    
+                } else if (this.mode === 'confirm') {
+                    // Verificar que coincidan
+                    if (this.currentPin === this.confirmPin) {
+                        // PIN configurado correctamente
+                        localStorage.setItem('app_pin', this.currentPin);
+                        this.unlockApp();
+                    } else {
+                        // No coinciden, volver a empezar
+                        document.getElementById('pinError').textContent = '❌ Los PINs no coinciden. Intenta de nuevo.';
+                        this.currentPin = '';
+                        this.confirmPin = '';
+                        this.mode = 'setup';
+                        document.getElementById('pinTitle').textContent = 'Configura tu PIN';
+                        document.getElementById('pinSubtitle').textContent = 'Crea un PIN de 4 dígitos';
+                        setTimeout(() => {
+                            this.updateDots();
+                            document.getElementById('pinError').textContent = '';
+                        }, 2000);
+                    }
+                    
+                } else if (this.mode === 'login') {
+                    // Verificar PIN
+                    if (this.currentPin === this.storedPin) {
+                        this.unlockApp();
+                    } else {
+                        document.getElementById('pinError').textContent = '❌ PIN incorrecto';
+                        this.currentPin = '';
+                        setTimeout(() => {
+                            this.updateDots();
+                            document.getElementById('pinError').textContent = '';
+                        }, 1500);
+                    }
+                }
+            },
+            
+            unlockApp() {
+                document.getElementById('pinScreen').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+                // Inicializar la app después de desbloquear
+                app.init();
+            }
+        };
+        
+        // ========== APP PRINCIPAL ==========
+        const app = {
+            meses: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+            cat: {
+                ing: ['💼 Sueldo','💻 Freelance','📈 Inversiones','🏠 Alquiler','🛍️ Ventas','🎁 Regalo','💰 Otros'],
+                fij: ['🏠 Vivienda','💡 Servicios','📺 Suscripciones','🛡️ Seguros','🚗 Transporte','📚 Educación','📌 Otros'],
+                var: ['🍽️ Alimentación','🚌 Transporte','🎬 Entretenimiento','⚕️ Salud','👕 Ropa','💄 Belleza','🐾 Mascotas','🎁 Regalos','🛍️ Otros']
+            },
+            tabs: [
+                {id:'resumen', name:'📊 Resumen', subs:null},
+                {id:'gestion', name:'💰 Gestión', subs:[
+                    {id:'ingresos', name:'💵 Ingresos'},
+                    {id:'fijos', name:'🏠 Gastos Fijos'},
+                    {id:'variables', name:'🛒 Gastos Variables'},
+                    {id:'tarjetas', name:'💳 Tarjetas'},
+                    {id:'prestamos', name:'🏦 Préstamos'}
+                ]},
+                {id:'metas', name:'🎯 Metas', subs:[
+                    {id:'ahorros', name:'🐷 Ahorros'},
+                    {id:'presupuestos', name:'🎯 Presupuestos'}
+                ]},
+                {id:'historial', name:'📜 Historial', subs:null}
+            ],
+            activeTab: 'resumen',
+            activeSub: null,
+            datos: { ing:{}, fij:{}, var:{}, tarjetas:[], prestamos:[], metas:{}, aho:{}, pres:{}, hist:[], tipoCambio: 1350 },
+            editando: { activo: false, tipo: null, indice: null },
+            
+            formatearPesos(num) {
+                const s = new Intl.NumberFormat('es-AR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(num);
+                return `$ ${s}`;
+            },
+            
+            // Convierte un string como "$ 1.234,56" a número 1234.56
+            parseMonto(str) {
+                if (str == null) return NaN;
+                const limpio = String(str)
+                    .replace(/[^0-9,.-]/g, '') // quita símbolo, espacios, etc.
+                    .replace(/\./g, '')        // quita puntos de miles
+                    .replace(/,/g, '.');        // cambia coma decimal por punto
+                const n = parseFloat(limpio);
+                return isNaN(n) ? NaN : n;
+            },
+            
+            // Formatea con "$ " + puntos de miles y coma decimal
+            formatearPesosConSimbolo(num) {
+                if (num == null || isNaN(num)) return '';
+                return this.formatearPesos(num);
+            },
+            
+            // Agrega formateo a los inputs de monto (focus/blur)
+            attachCurrencyFormatters() {
+                const ids = [
+                    'ing-monto','fij-monto','var-monto',
+                    'tarjeta-monto','tarjeta-cuota-rapido',
+                    'prestamo-monto','prestamo-cuota-rapido',
+                    'meta-monto','aho-monto','pres-monto'
+                ];
+                const formatLive = (raw) => {
+                    if (raw == null) return '';
+                    // Quitar símbolo y espacios
+                    let s = String(raw).replace(/\s|\$/g, '');
+                    // Permitir dígitos y coma; quitar puntos (siempre miles) y otros
+                    s = s.replace(/\./g, '');
+                    s = s.replace(/[^0-9,\-]/g, '');
+                    // Separar por coma (único separador decimal válido en vivo)
+                    const lastComma = s.lastIndexOf(',');
+                    let entero = lastComma >= 0 ? s.slice(0, lastComma) : s;
+                    let dec = lastComma >= 0 ? s.slice(lastComma + 1) : '';
+                    // Limpiar signos/ruido
+                    const neg = entero.startsWith('-');
+                    if (neg) entero = entero.slice(1);
+                    entero = entero.replace(/[^0-9]/g, '');
+                    dec = dec.replace(/[^0-9]/g, '').slice(0, 2);
+                    // Limitar a 9 dígitos enteros (hasta 900.000.000)
+                    if (entero.length > 9) entero = entero.slice(0, 9);
+                    // Eliminar ceros a la izquierda excepto si todo es 0
+                    entero = entero.replace(/^0+(\d)/, '$1');
+                    // Agrupar miles con punto
+                    const withThousands = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    const base = (neg ? '-' : '') + withThousands;
+                    if (!base && !dec) return '';
+                    return dec.length ? `$ ${base},${dec}` : `$ ${base}`;
+                };
+                const setFormattedWithCaret = (input) => {
+                    const prev = input.value;
+                    const selStart = input.selectionStart || 0;
+                    // Contar dígitos antes del caret
+                    const digitsBefore = (prev.slice(0, selStart).match(/\d/g) || []).length;
+                    const formatted = formatLive(prev);
+                    input.value = formatted;
+                    // Posicionar caret al mismo conteo de dígitos
+                    let count = 0;
+                    let newPos = formatted.length;
+                    for (let i = 0; i < formatted.length; i++) {
+                        if (/\d/.test(formatted[i])) count++;
+                        if (count >= digitsBefore) { newPos = i + 1; break; }
+                    }
+                    try { input.setSelectionRange(newPos, newPos); } catch {}
+                };
+                ids.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (!input) return;
+                    // Al enfocar: mostrar valor crudo editable (con punto decimal)
+                    input.addEventListener('focus', () => {
+                        const val = this.parseMonto(input.value);
+                        input.value = isNaN(val) ? '' : String(val);
+                    });
+                    // Mientras escribe: formateo en vivo con preservación de cursor (ligero)
+                    input.addEventListener('input', (e) => {
+                        // Permitir borrar completo
+                        if (!input.value) return;
+                        setFormattedWithCaret(input);
+                    });
+                    // Al salir: formatear con símbolo y separadores
+                    input.addEventListener('blur', () => {
+                        const val = this.parseMonto(input.value);
+                        input.value = isNaN(val) ? '' : this.formatearPesosConSimbolo(val);
+                    });
+                });
+            },
+            
+            convertirARS(monto, moneda) {
+                if (moneda === 'USD') {
+                    return monto * this.datos.tipoCambio;
+                }
+                return monto;
+            },
+            
+            guardarTipoCambio() {
+                const tc = parseFloat(document.getElementById('tipoCambio').value);
+                if (tc && tc > 0) {
+                    this.datos.tipoCambio = tc;
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            async actualizarDolar() {
+                try {
+                    // Mostrar indicador de carga
+                    const btn = event.target;
+                    const textoOriginal = btn.innerHTML;
+                    btn.innerHTML = '⏳ Cargando...';
+                    btn.disabled = true;
+                    
+                    // Intentar obtener el dólar desde dolarapi.com (API pública argentina)
+                    const response = await fetch('https://dolarapi.com/v1/dolares/blue');
+                    
+                    if (!response.ok) throw new Error('Error al obtener cotización');
+                    
+                    const data = await response.json();
+                    const valorVenta = data.venta;
+                    
+                    // Actualizar el input y los datos
+                    document.getElementById('tipoCambio').value = valorVenta;
+                    this.datos.tipoCambio = valorVenta;
+                    this.guardar();
+                    this.actualizar();
+                    
+                    // Mostrar mensaje de éxito
+                    btn.innerHTML = '✅ Actualizado';
+                    setTimeout(() => {
+                        btn.innerHTML = textoOriginal;
+                        btn.disabled = false;
+                    }, 2000);
+                    
+                    alert(`✅ Dólar actualizado: $${valorVenta.toFixed(2)}`);
+                    
+                } catch (error) {
+                    console.error('Error al actualizar dólar:', error);
+                    alert('❌ No se pudo obtener la cotización del dólar. Verifica tu conexión o ingrésalo manualmente.');
+                    
+                    // Restaurar botón
+                    const btn = event.target;
+                    btn.innerHTML = '🔄 Actualizar';
+                    btn.disabled = false;
+                }
+            },
+            
+            seleccionarColor(tipo, color, event) {
+                // Actualizar el valor del input hidden
+                document.getElementById(`${tipo}-color`).value = color;
+                
+                // Remover la clase selected de todos los color-option del tipo específico
+                const contenedor = event.target.closest('.color-picker');
+                contenedor.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                
+                // Agregar clase selected al elemento clickeado si es un color-option
+                if (event.target.classList.contains('color-option')) {
+                    event.target.classList.add('selected');
+                }
+            },
+            
+            init() {
+                const hoy = new Date();
+                this.llenarSelects();
+                document.getElementById('mesActual').value = hoy.getMonth();
+                document.getElementById('anioActual').value = hoy.getFullYear();
+                this.crearTabs();
+                this.cargarDatos();
+                document.getElementById('tipoCambio').value = this.datos.tipoCambio;
+                this.actualizar();
+                this.attachCurrencyFormatters();
+                // Fuerza el tab inicial, eliminando tooltips fuera de contexto
+                const tabsC = document.getElementById('tabsContainer');
+                if(tabsC && tabsC.children.length > 0){
+                  tabsC.children[0].click(); // activa resumen limpio
+                }
+                if (!localStorage.getItem('aura_visited')) {
+                    setTimeout(() => this.mostrarAyuda(), 500);
+                    localStorage.setItem('aura_visited', '1');
+                }
+            },
+            
+            crearTabs() {
+                const tabsC = document.getElementById('tabsContainer');
+                const subsC = document.getElementById('subtabsContainer');
+                
+			this.tabs.forEach((tab, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = `tab ${i===0?'active':''}`;
+                    
+                    // Separar emoji del texto
+                    const parts = tab.name.split(' ');
+                    const emoji = parts[0]; // El emoji
+                    const texto = parts.slice(1).join(' '); // El resto del texto
+                    
+                    // Crear estructura: emoji arriba, texto abajo
+                    btn.innerHTML = `<span style="font-size: 20px;">${emoji}</span><span style="font-size: 12px;">${texto}</span>`;
+                    
+                    btn.onclick = () => this.cambiarTab(tab.id, tab.subs);
+                    tabsC.appendChild(btn);
+                    
+                    if (tab.subs) {
+                        // Genera el subtabs carrusel
+                        const subDiv = document.createElement('div');
+                        subDiv.className = 'subtabs';
+                        subDiv.id = `subtabs-${tab.id}`;
+                        tab.subs.forEach((sub, j) => {
+                            const subBtn = document.createElement('button');
+                            subBtn.className = `subtab ${j===0?'active':''}`;
+                            subBtn.textContent = sub.name;
+                            subBtn.onclick = () => this.cambiarSubTab(tab.id, sub.id, subBtn);
+                            subDiv.appendChild(subBtn);
+                        });
+                        // Listener scroll como antes
+                        subDiv.addEventListener('scroll', function() {
+                            let ticking = false;
+                            if (!ticking) {
+                                window.requestAnimationFrame(() => {
+                                    const subtabsRect = subDiv.getBoundingClientRect();
+                                    let closest, minDist = Infinity;
+                                    subDiv.querySelectorAll('.subtab').forEach(subtab => {
+                                        const rect = subtab.getBoundingClientRect();
+                                        const dist = Math.abs(rect.left + rect.width/2 - (subtabsRect.left + subtabsRect.width/2));
+                                        if (dist < minDist) { closest = subtab; minDist = dist; }
+                                    });
+                                    if (closest && !closest.classList.contains('active')) closest.click();
+                                    ticking = false;
+                                });
+                                ticking = true;
+                            }
+                        });
+                        subsC.appendChild(subDiv);
+                    }
+                });
+            },
+            
+            cambiarTab(id, subs) {
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.subtabs').forEach(s => s.classList.remove('active'));
+                event.target.classList.add('active');
+                this.activeTab = id;
+                if (subs) {
+                    document.getElementById(`subtabs-${id}`).classList.add('active');
+                    const firstSub = subs[0].id;
+                    this.activeSub = firstSub;
+                    document.getElementById(`tab-${id}-${firstSub}`).classList.add('active');
+                } else {
+                    this.activeSub = null;
+                    document.getElementById(`tab-${id}`).classList.add('active');
+                    if (id === 'historial') this.mostrarHist();
+                }
+                // Lógica tooltip unificada:
+                const subsC = document.getElementById('subtabsContainer');
+                subsC.querySelectorAll('.subtabs-tooltip').forEach(t => t.remove());
+                if ((id === 'gestion' || id === 'metas') && subs) {
+                    const subtabsDiv = document.getElementById(`subtabs-${id}`);
+                    if (subtabsDiv) {
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'subtabs-tooltip';
+                        tooltip.innerHTML = '💡 Deslizar horizontalmente para ver más opciones';
+                        subsC.insertBefore(tooltip, subtabsDiv);
+                    }
+                }
+            },
+            
+            cambiarSubTab(parent, sub, el) {
+                document.querySelectorAll(`#subtabs-${parent} .subtab`).forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                el.classList.add('active');
+                this.activeSub = sub;
+                document.getElementById(`tab-${parent}-${sub}`).classList.add('active');
+            },
+            
+llenarSelects() {
+                const mSel = document.getElementById('mesActual');
+                this.meses.forEach((m,i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = m;
+                    mSel.appendChild(opt);
+                });
+                
+                // Llenar selector de años (2020-2050)
+                const aSel = document.getElementById('anioActual');
+                for(let year = 2020; year <= 2050; year++) {
+                    const opt = document.createElement('option');
+                    opt.value = year;
+                    opt.textContent = year;
+                    aSel.appendChild(opt);
+                }
+                
+                ['ing','fij','var'].forEach(t => {
+                    const sel = document.getElementById(`${t}-cat`);
+                    this.cat[t].forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.substring(3);
+                        opt.textContent = c;
+                        sel.appendChild(opt);
+                    });
+                });
+                const pSel = document.getElementById('pres-cat');
+                this.cat.var.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.substring(3);
+                    opt.textContent = c;
+                    pSel.appendChild(opt);
+                });
+            },
+            
+            getMes() {
+                return `${document.getElementById('anioActual').value}-${document.getElementById('mesActual').value}`;
+            },
+            
+            addHist(txt) {
+                this.datos.hist.unshift({fecha: new Date().toLocaleString('es-AR'), txt});
+                if (this.datos.hist.length > 50) this.datos.hist.pop();
+            },
+            
+            add(tipo) {
+                const nom = document.getElementById(`${tipo}-nombre`).value;
+                const monto = this.parseMonto(document.getElementById(`${tipo}-monto`).value);
+                const cat = document.getElementById(`${tipo}-cat`).value;
+                const col = document.getElementById(`${tipo}-color`).value;
+                const moneda = document.getElementById(`${tipo}-moneda`).value;
+                if (!nom || !monto) return alert('⚠️ Completa los campos');
+                const mk = this.getMes();
+                if (!this.datos[tipo][mk]) this.datos[tipo][mk] = [];
+                
+                // Si estamos en modo edición
+                if (this.editando.activo && this.editando.tipo === tipo) {
+                    this.datos[tipo][mk][this.editando.indice] = {nom, monto, cat, col, moneda};
+                    const montoARS = this.convertirARS(monto, moneda);
+                    this.addHist(`Editado ${tipo}: ${nom} - ${this.formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
+                    this.cancelarEdicion(tipo);
+                } else {
+                    // Modo agregar normal
+                    this.datos[tipo][mk].push({nom, monto, cat, col, moneda});
+                    const montoARS = this.convertirARS(monto, moneda);
+                    this.addHist(`${tipo}: ${nom} - ${this.formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
+                    document.getElementById(`${tipo}-nombre`).value = '';
+                    document.getElementById(`${tipo}-monto`).value = '';
+                }
+                
+                this.guardar();
+                this.actualizar();
+            },
+            
+            editar(tipo, idx) {
+                const mk = this.getMes();
+                const item = this.datos[tipo][mk][idx];
+                
+                // Cargar datos en el formulario
+                document.getElementById(`${tipo}-nombre`).value = item.nom;
+                document.getElementById(`${tipo}-monto`).value = item.monto;
+                document.getElementById(`${tipo}-cat`).value = item.cat;
+                document.getElementById(`${tipo}-color`).value = item.col;
+                document.getElementById(`${tipo}-moneda`).value = item.moneda || 'ARS';
+                
+                // Seleccionar visualmente el color en la paleta
+                const tabId = `#tab-gestion-${tipo === 'ing' ? 'ingresos' : tipo === 'fij' ? 'fijos' : 'variables'}`;
+                const colorPicker = document.querySelector(`${tabId} .color-picker`);
+                if (colorPicker) {
+                    colorPicker.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (opt.style.background === item.col) {
+                            opt.classList.add('selected');
+                        }
+                    });
+                }
+                
+                // Activar modo edición
+                this.editando = { activo: true, tipo: tipo, indice: idx };
+                
+                // Cambiar el botón a "Actualizar"
+                const btn = document.querySelector(`${tabId} .btn-primary`);
+                btn.textContent = '✓ Actualizar';
+                btn.style.background = 'var(--warning)';
+                
+                // Agregar botón de cancelar si no existe
+                if (!document.getElementById(`cancelar-${tipo}`)) {
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.id = `cancelar-${tipo}`;
+                    cancelBtn.className = 'btn btn-danger';
+                    cancelBtn.textContent = '✕ Cancelar';
+                    cancelBtn.onclick = () => this.cancelarEdicion(tipo);
+                    btn.parentNode.appendChild(cancelBtn);
+                }
+                
+                // Scroll al formulario
+                document.querySelector(`#tab-gestion-${tipo === 'ing' ? 'ingresos' : tipo === 'fij' ? 'fijos' : 'variables'}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            },
+            
+            cancelarEdicion(tipo) {
+                // Resetear modo edición
+                this.editando = { activo: false, tipo: null, indice: null };
+                
+                // Limpiar formulario
+                document.getElementById(`${tipo}-nombre`).value = '';
+                document.getElementById(`${tipo}-monto`).value = '';
+                
+                // Restaurar botón
+                const btn = document.querySelector(`#tab-gestion-${tipo === 'ing' ? 'ingresos' : tipo === 'fij' ? 'fijos' : 'variables'} .btn-primary`);
+                btn.textContent = '+ Agregar';
+                btn.style.background = '';
+                
+                // Eliminar botón cancelar
+                const cancelBtn = document.getElementById(`cancelar-${tipo}`);
+                if (cancelBtn) cancelBtn.remove();
+            },
+            
+            del(tipo, idx) {
+                const mk = this.getMes();
+                if (confirm(`¿Eliminar "${this.datos[tipo][mk][idx].nom}"?`)) {
+                    this.addHist(`Eliminado: ${this.datos[tipo][mk][idx].nom}`);
+                    this.datos[tipo][mk].splice(idx, 1);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            cambiarModoTarjeta(modo) {
+                const section = event.target.closest('.section');
+                section.querySelectorAll('.card-mode-switch .mode-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                if (modo === 'completo') {
+                    document.getElementById('tarjetaModoCompleto').style.display = 'block';
+                    document.getElementById('tarjetaModoRapido').style.display = 'none';
+                } else {
+                    document.getElementById('tarjetaModoCompleto').style.display = 'none';
+                    document.getElementById('tarjetaModoRapido').style.display = 'block';
+                }
+            },
+            
+            agregarTarjetaCompleto() {
+                const nombre = document.getElementById('tarjeta-nombre').value;
+                const tarjeta = document.getElementById('tarjeta-tarjeta').value;
+                const monto = this.parseMonto(document.getElementById('tarjeta-monto').value);
+                const cuotas = parseInt(document.getElementById('tarjeta-cuotas').value);
+                const fecha = document.getElementById('tarjeta-fecha').value;
+                
+                if (!nombre || !tarjeta || !monto || !cuotas || !fecha) {
+                    return alert('⚠️ Completa todos los campos');
+                }
+                
+                this.datos.tarjetas.push({
+                    nombre,
+                    tarjeta,
+                    totalCuotas: cuotas,
+                    valorCuota: monto / cuotas,
+                    cuotaActual: 1,
+                    fechaInicio: new Date(fecha)
+                });
+                
+                this.addHist(`Tarjeta agregada: ${nombre} - ${cuotas} cuotas de ${this.formatearPesos(monto / cuotas)}`);
+                
+                document.getElementById('tarjeta-nombre').value = '';
+                document.getElementById('tarjeta-tarjeta').value = '';
+                document.getElementById('tarjeta-monto').value = '';
+                document.getElementById('tarjeta-cuotas').value = '';
+                document.getElementById('tarjeta-fecha').value = '';
+                
+                this.guardar();
+                this.actualizar();
+            },
+            
+            agregarTarjetaRapido() {
+                const nombre = document.getElementById('tarjeta-nombre-rapido').value;
+                const tarjeta = document.getElementById('tarjeta-tarjeta-rapido').value;
+                const cuota = this.parseMonto(document.getElementById('tarjeta-cuota-rapido').value);
+                const cuotas = parseInt(document.getElementById('tarjeta-cuotas-rapido').value);
+                const actual = parseInt(document.getElementById('tarjeta-actual-rapido').value);
+                
+                if (!nombre || !tarjeta || !cuota || !cuotas || !actual) {
+                    return alert('⚠️ Completa todos los campos');
+                }
+                
+                if (actual > cuotas) {
+                    return alert('⚠️ La cuota actual no puede ser mayor al total de cuotas');
+                }
+                
+                const fechaInicio = new Date();
+                fechaInicio.setMonth(fechaInicio.getMonth() - (actual - 1));
+                
+                this.datos.tarjetas.push({
+                    nombre,
+                    tarjeta,
+                    totalCuotas: cuotas,
+                    valorCuota: cuota,
+                    cuotaActual: actual,
+                    fechaInicio
+                });
+                
+                this.addHist(`Tarjeta agregada: ${nombre} - cuota ${actual}/${cuotas}`);
+                
+                document.getElementById('tarjeta-nombre-rapido').value = '';
+                document.getElementById('tarjeta-tarjeta-rapido').value = '';
+                document.getElementById('tarjeta-cuota-rapido').value = '';
+                document.getElementById('tarjeta-cuotas-rapido').value = '';
+                document.getElementById('tarjeta-actual-rapido').value = '';
+                
+                this.guardar();
+                this.actualizar();
+            },
+            
+            mostrarTarjetas() {
+                const lista = document.getElementById('listaTarjetas');
+                
+                if (this.datos.tarjetas.length === 0) {
+                    lista.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;">No hay tarjetas registradas</p>';
+                    return;
+                }
+                
+                lista.innerHTML = this.datos.tarjetas.map((t, i) => {
+                    const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
+                    const saldoTotal = cuotasRestantes * t.valorCuota;
+                    const progreso = ((t.cuotaActual - 1) / t.totalCuotas) * 100;
+                    
+                    return `
+                        <div class="item">
+                            <div class="item-info">
+                                <div class="item-name">💳 ${t.nombre}</div>
+                                <small style="color:var(--text-light);font-size:11px;">${t.tarjeta} | Cuota: ${this.formatearPesos(t.valorCuota)}</small>
+                            </div>
+                            <div style="text-align:center;">
+                                <strong>${t.cuotaActual}/${t.totalCuotas}</strong><br>
+                                <small style="font-size:10px;">cuotas</small>
+                            </div>
+                            <div style="color:var(--danger);font-weight:700;">${this.formatearPesos(saldoTotal)}</div>
+                            <span class="badge ${cuotasRestantes === 0 ? 'badge-success' : 'badge-warning'}">${cuotasRestantes === 0 ? 'Pagado' : 'Activo'}</span>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                ${cuotasRestantes > 0 ? `<button class="btn btn-success" onclick="app.avanzarCuotaTarjeta(${i})">✓ Pagar</button>` : ''}
+                                <button class="btn btn-danger" onclick="app.eliminarTarjeta(${i})">×</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+            
+            avanzarCuotaTarjeta(index) {
+                const tarjeta = this.datos.tarjetas[index];
+                if (tarjeta.cuotaActual < tarjeta.totalCuotas) {
+                    tarjeta.cuotaActual++;
+                    this.addHist(`Cuota pagada: ${tarjeta.nombre} (${tarjeta.cuotaActual}/${tarjeta.totalCuotas})`);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            eliminarTarjeta(index) {
+                if (confirm(`¿Eliminar "${this.datos.tarjetas[index].nombre}"?`)) {
+                    this.addHist(`Tarjeta eliminada: ${this.datos.tarjetas[index].nombre}`);
+                    this.datos.tarjetas.splice(index, 1);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            cambiarModoPrestamo(modo) {
+                const section = event.target.closest('.section');
+                section.querySelectorAll('.card-mode-switch .mode-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                if (modo === 'completo') {
+                    document.getElementById('prestamoModoCompleto').style.display = 'block';
+                    document.getElementById('prestamoModoRapido').style.display = 'none';
+                } else {
+                    document.getElementById('prestamoModoCompleto').style.display = 'none';
+                    document.getElementById('prestamoModoRapido').style.display = 'block';
+                }
+            },
+            
+            agregarPrestamoCompleto() {
+                const nombre = document.getElementById('prestamo-nombre').value;
+                const entidad = document.getElementById('prestamo-tipo').value;
+                const monto = this.parseMonto(document.getElementById('prestamo-monto').value);
+                const cuotas = parseInt(document.getElementById('prestamo-cuotas').value);
+                const fecha = document.getElementById('prestamo-fecha').value;
+                
+                if (!nombre || !entidad || !monto || !cuotas || !fecha) {
+                    return alert('⚠️ Completa todos los campos');
+                }
+                
+                this.datos.prestamos.push({
+                    nombre,
+                    entidad,
+                    totalCuotas: cuotas,
+                    valorCuota: monto / cuotas,
+                    cuotaActual: 1,
+                    fechaInicio: new Date(fecha)
+                });
+                
+                this.addHist(`Préstamo agregado: ${nombre} - ${cuotas} cuotas de ${this.formatearPesos(monto / cuotas)}`);
+                
+                document.getElementById('prestamo-nombre').value = '';
+                document.getElementById('prestamo-tipo').value = '';
+                document.getElementById('prestamo-monto').value = '';
+                document.getElementById('prestamo-cuotas').value = '';
+                document.getElementById('prestamo-fecha').value = '';
+                
+                this.guardar();
+                this.actualizar();
+            },
+            
+            agregarPrestamoRapido() {
+                const nombre = document.getElementById('prestamo-nombre-rapido').value;
+                const entidad = document.getElementById('prestamo-tipo-rapido').value;
+                const cuota = this.parseMonto(document.getElementById('prestamo-cuota-rapido').value);
+                const cuotas = parseInt(document.getElementById('prestamo-cuotas-rapido').value);
+                const actual = parseInt(document.getElementById('prestamo-actual-rapido').value);
+                
+                if (!nombre || !entidad || !cuota || !cuotas || !actual) {
+                    return alert('⚠️ Completa todos los campos');
+                }
+                
+                if (actual > cuotas) {
+                    return alert('⚠️ La cuota actual no puede ser mayor al total de cuotas');
+                }
+                
+                const fechaInicio = new Date();
+                fechaInicio.setMonth(fechaInicio.getMonth() - (actual - 1));
+                
+                this.datos.prestamos.push({
+                    nombre,
+                    entidad,
+                    totalCuotas: cuotas,
+                    valorCuota: cuota,
+                    cuotaActual: actual,
+                    fechaInicio
+                });
+                
+                this.addHist(`Préstamo agregado: ${nombre} - cuota ${actual}/${cuotas}`);
+                
+                document.getElementById('prestamo-nombre-rapido').value = '';
+                document.getElementById('prestamo-tipo-rapido').value = '';
+                document.getElementById('prestamo-cuota-rapido').value = '';
+                document.getElementById('prestamo-cuotas-rapido').value = '';
+                document.getElementById('prestamo-actual-rapido').value = '';
+                
+                this.guardar();
+                this.actualizar();
+            },
+            
+            mostrarPrestamos() {
+                const lista = document.getElementById('listaPrestamos');
+                
+                if (this.datos.prestamos.length === 0) {
+                    lista.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;">No hay préstamos registrados</p>';
+                    return;
+                }
+                
+                lista.innerHTML = this.datos.prestamos.map((p, i) => {
+                    const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
+                    const saldoTotal = cuotasRestantes * p.valorCuota;
+                    
+                    return `
+                        <div class="item">
+                            <div class="item-info">
+                                <div class="item-name">🏦 ${p.nombre}</div>
+                                <small style="color:var(--text-light);font-size:11px;">${p.entidad} | Cuota: ${this.formatearPesos(p.valorCuota)}</small>
+                            </div>
+                            <div style="text-align:center;">
+                                <strong>${p.cuotaActual}/${p.totalCuotas}</strong><br>
+                                <small style="font-size:10px;">cuotas</small>
+                            </div>
+                            <div style="color:var(--danger);font-weight:700;">${this.formatearPesos(saldoTotal)}</div>
+                            <span class="badge ${cuotasRestantes === 0 ? 'badge-success' : 'badge-warning'}">${cuotasRestantes === 0 ? 'Pagado' : 'Activo'}</span>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                ${cuotasRestantes > 0 ? `<button class="btn btn-success" onclick="app.avanzarCuotaPrestamo(${i})">✓ Pagar</button>` : ''}
+                                <button class="btn btn-danger" onclick="app.eliminarPrestamo(${i})">×</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+            
+            avanzarCuotaPrestamo(index) {
+                const prestamo = this.datos.prestamos[index];
+                if (prestamo.cuotaActual < prestamo.totalCuotas) {
+                    prestamo.cuotaActual++;
+                    this.addHist(`Cuota pagada: ${prestamo.nombre} (${prestamo.cuotaActual}/${prestamo.totalCuotas})`);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            eliminarPrestamo(index) {
+                if (confirm(`¿Eliminar "${this.datos.prestamos[index].nombre}"?`)) {
+                    this.addHist(`Préstamo eliminado: ${this.datos.prestamos[index].nombre}`);
+                    this.datos.prestamos.splice(index, 1);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            addMeta() {
+                const nom = document.getElementById('meta-nombre').value;
+                const monto = this.parseMonto(document.getElementById('meta-monto').value);
+                if (!nom || !monto) return alert('⚠️ Completa los campos');
+                const mk = this.getMes();
+                if (!this.datos.metas[mk]) this.datos.metas[mk] = [];
+                this.datos.metas[mk].push({nom,monto});
+                document.getElementById('meta-nombre').value = '';
+                document.getElementById('meta-monto').value = '';
+                this.guardar();
+                this.actualizar();
+            },
+			
+			editarMeta(index) {
+                const mk = this.getMes();
+                const meta = this.datos.metas[mk][index];
+                document.getElementById('meta-nombre').value = meta.nom;
+                document.getElementById('meta-monto').value = meta.monto;
+                // Eliminar sin confirmación ya que estamos editando
+                this.datos.metas[mk].splice(index, 1);
+                this.guardar();
+                this.actualizar();
+                // Scroll hacia el formulario
+                document.getElementById('meta-nombre').focus();
+            },
+            
+            eliminarMeta(index) {
+                if (confirm('¿Eliminar esta meta?')) {
+                    const mk = this.getMes();
+                    this.datos.metas[mk].splice(index, 1);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            editarAhorro(index) {
+                const mk = this.getMes();
+                const ahorro = this.datos.aho[mk][index];
+                document.getElementById('aho-nombre').value = ahorro.nom;
+                document.getElementById('aho-monto').value = ahorro.monto;
+                // Eliminar sin confirmación ya que estamos editando
+                this.datos.aho[mk].splice(index, 1);
+                this.guardar();
+                this.actualizar();
+                // Scroll hacia el formulario
+                document.getElementById('aho-nombre').focus();
+            },
+            
+            eliminarAhorro(index) {
+                if (confirm('¿Eliminar este ahorro?')) {
+                    const mk = this.getMes();
+                    this.datos.aho[mk].splice(index, 1);
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+            
+            addAhorro() {
+                const nom = document.getElementById('aho-nombre').value;
+                const monto = this.parseMonto(document.getElementById('aho-monto').value);
+                if (!nom || !monto) return alert('⚠️ Completa los campos');
+                const mk = this.getMes();
+                if (!this.datos.aho[mk]) this.datos.aho[mk] = [];
+                this.datos.aho[mk].push({nom,monto});
+                document.getElementById('aho-nombre').value = '';
+                document.getElementById('aho-monto').value = '';
+                this.guardar();
+                this.actualizar();
+            },
+            
+            addPresupuesto() {
+                const cat = document.getElementById('pres-cat').value;
+                const monto = this.parseMonto(document.getElementById('pres-monto').value);
+                if (!cat || !monto) return alert('⚠️ Completa los campos');
+                const mk = this.getMes();
+                if (!this.datos.pres[mk]) this.datos.pres[mk] = {};
+                this.datos.pres[mk][cat] = monto;
+                document.getElementById('pres-monto').value = '';
+                this.guardar();
+                this.actualizar();
+            },
+            
+			editarPresupuesto(cat) {
+                const mk = this.getMes();
+                const monto = this.datos.pres[mk][cat];
+                document.getElementById('pres-cat').value = cat;
+                document.getElementById('pres-monto').value = monto;
+                // Eliminar sin confirmación ya que estamos editando
+                delete this.datos.pres[mk][cat];
+                this.guardar();
+                this.actualizar();
+                // Scroll hacia el formulario
+                document.getElementById('pres-monto').focus();
+            },
+            
+            eliminarPresupuesto(cat) {
+                if (confirm(`¿Eliminar el presupuesto de "${cat}"?`)) {
+                    const mk = this.getMes();
+                    delete this.datos.pres[mk][cat];
+                    this.guardar();
+                    this.actualizar();
+                }
+            },
+			
+            calcularCuotasMes(fecha) {
+                const mes = fecha.getMonth();
+                const anio = fecha.getFullYear();
+                let total = 0;
+                
+                this.datos.tarjetas.forEach(t => {
+                    const mesesDesdeInicio = (anio - t.fechaInicio.getFullYear()) * 12 + (mes - t.fechaInicio.getMonth());
+                    const cuotaEnEsteMes = mesesDesdeInicio + 1;
+                    
+                    if (cuotaEnEsteMes >= t.cuotaActual && cuotaEnEsteMes <= t.totalCuotas) {
+                        total += t.valorCuota;
+                    }
+                });
+                
+                this.datos.prestamos.forEach(p => {
+                    const mesesDesdeInicio = (anio - p.fechaInicio.getFullYear()) * 12 + (mes - p.fechaInicio.getMonth());
+                    const cuotaEnEsteMes = mesesDesdeInicio + 1;
+                    
+                    if (cuotaEnEsteMes >= p.cuotaActual && cuotaEnEsteMes <= p.totalCuotas) {
+                        total += p.valorCuota;
+                    }
+                });
+                
+                return total;
+            },
+            
+            getMesActual() {
+                const mes = parseInt(document.getElementById('mesActual').value);
+                const anio = parseInt(document.getElementById('anioActual').value);
+                return new Date(anio, mes, 1);
+            },
+            
+            mostrarLista(tipo) {
+                const mk = this.getMes();
+                const lista = this.datos[tipo][mk] || [];
+                const c = document.getElementById(`lista-${tipo}`);
+                if (lista.length === 0) {
+                    c.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;font-size:13px;">No hay registros</p>';
+                    return;
+                }
+                
+                // Agrupar por categoría
+                const porCategoria = {};
+                lista.forEach((it, idx) => {
+                    if (!porCategoria[it.cat]) {
+                        porCategoria[it.cat] = [];
+                    }
+                    porCategoria[it.cat].push({ ...it, indiceOriginal: idx });
+                });
+                
+                // Generar HTML agrupado
+                let html = '';
+                Object.keys(porCategoria).sort().forEach(cat => {
+                    const items = porCategoria[cat];
+                    const totalCat = items.reduce((sum, it) => sum + this.convertirARS(it.monto, it.moneda || 'ARS'), 0);
+                    const ico = this.cat[tipo].find(x => x.includes(cat))?.split(' ')[0] || '📌';
+                    const colorCat = items[0].col;
+                    
+                    html += `
+                        <div style="margin-bottom: 15px;">
+                            <div class="category-header" onclick="app.toggleCategoria('${tipo}-${cat.replace(/\s+/g, '-')}')" style="background: ${colorCat}; color: white; padding: 14px 18px; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 22px;">${ico}</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 15px;">${cat}</div>
+                                        <div style="font-size: 11px; opacity: 0.9;">${items.length} registro${items.length > 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="font-size: 20px; font-weight: 700;">${this.formatearPesos(totalCat)}</div>
+                                    <span id="arrow-${tipo}-${cat.replace(/\s+/g, '-')}" style="font-size: 18px; transition: transform 0.3s;">▼</span>
+                                </div>
+                            </div>
+                            <div id="${tipo}-${cat.replace(/\s+/g, '-')}" class="category-items" style="display: none; margin-top: 8px; padding: 0 8px;">
+                    `;
+                    
+                    items.forEach(it => {
+                        const montoARS = this.convertirARS(it.monto, it.moneda || 'ARS');
+                        const badge = it.moneda === 'USD' ? '<span class="currency-badge">USD</span>' : '';
+                        html += `
+                            <div class="item" style="background: var(--bg); margin-bottom: 6px; border-left: 4px solid ${colorCat};">
+                                <div class="item-info">
+                                    <div class="item-name">
+                                        <span>${it.nom}${badge}</span>
+                                    </div>
+                                </div>
+                                <div class="item-amount">${this.formatearPesos(montoARS)}</div>
+                                <button class="btn btn-info" onclick="app.editar('${tipo}',${it.indiceOriginal})" style="padding: 8px 16px;" title="Editar">✏️</button>
+                                <button class="btn btn-danger" onclick="app.del('${tipo}',${it.indiceOriginal})" title="Eliminar">×</button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                c.innerHTML = html;
+            },
+            
+            toggleCategoria(id) {
+                const elem = document.getElementById(id);
+                const arrow = document.getElementById('arrow-' + id);
+                if (elem.style.display === 'none') {
+                    elem.style.display = 'block';
+                    arrow.style.transform = 'rotate(180deg)';
+                } else {
+                    elem.style.display = 'none';
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            },
+            
+            
+			mostrarAho() {
+                const mk = this.getMes();
+                const metas = this.datos.metas[mk] || [];
+                const aho = this.datos.aho[mk] || [];
+                const c = document.getElementById('lista-aho');
+                let html = '';
+                if (metas.length > 0) {
+                    html += '<h4 style="color:var(--primary-dark);margin-bottom:10px;font-size:14px;">🎯 Metas</h4>';
+                    html += metas.map((m, i) => `
+                        <div class="item">
+                            <div style="flex:1;">${m.nom}</div>
+                            <div class="item-amount">${this.formatearPesos(m.monto)}</div>
+                            <button class="btn-info" onclick="app.editarMeta(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
+                            <button class="btn-danger" onclick="app.eliminarMeta(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
+                        </div>
+                    `).join('');
+                }
+                if (aho.length > 0) {
+                    html += '<h4 style="color:var(--primary-dark);margin:15px 0 10px;font-size:14px;">💰 Ahorros</h4>';
+                    html += aho.map((a, i) => `
+                        <div class="item">
+                            <div style="flex:1;">${a.nom}</div>
+                            <div class="item-amount">${this.formatearPesos(a.monto)}</div>
+                            <button class="btn-info" onclick="app.editarAhorro(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
+                            <button class="btn-danger" onclick="app.eliminarAhorro(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
+                        </div>
+                    `).join('');
+                }
+                c.innerHTML = html || '<p style="text-align:center;color:var(--text-light);padding:20px;font-size:13px;">No hay registros</p>';
+                
+                const metaT = metas.reduce((s, m) => s + m.monto, 0);
+                const ahoT = aho.reduce((s, a) => s + a.monto, 0);
+                const prog = document.getElementById('progresoAhorro');
+                if (metaT === 0) {
+                    prog.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:15px;font-size:13px;">Define una meta</p>';
+                    return;
+                }
+                const porc = Math.min((ahoT / metaT) * 100, 100);
+                const diff = metaT - ahoT;
+                prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;"><span><strong>Meta:</strong> ${this.formatearPesos(metaT)}</span><span><strong>Ahorrado:</strong> ${this.formatearPesos(ahoT)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${porc}%">${porc.toFixed(0)}%</div></div><div style="text-align:center;margin-top:10px;color:${diff>0?'var(--danger)':'var(--success)'};font-weight:700;font-size:14px;">${diff>0?`Faltan ${this.formatearPesos(diff)}`:'¡Meta alcanzada! 🎉'}</div>`;
+            },
+            
+            mostrarPres() {
+                const mk = this.getMes();
+                const pres = this.datos.pres[mk] || {};
+                const vars = this.datos.var[mk] || [];
+                const c = document.getElementById('listaPresupuestos');
+                if (Object.keys(pres).length === 0) {
+                    c.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;font-size:13px;">No hay presupuestos</p>';
+                    return;
+                }
+                const gCat = {};
+                vars.forEach(v => {
+                    const montoARS = this.convertirARS(v.monto, v.moneda || 'ARS');
+                    gCat[v.cat] = (gCat[v.cat] || 0) + montoARS;
+                });
+                c.innerHTML = Object.entries(pres).map(([cat, lim]) => {
+                    const gast = gCat[cat] || 0;
+                    const porc = Math.min((gast / lim) * 100, 100);
+                    const disp = lim - gast;
+                    const ico = this.cat.var.find(x => x.includes(cat))?.split(' ')[0] || '📌';
+                    let col = 'var(--success)', msg = 'OK ✓';
+                    if (porc > 100) { col = 'var(--danger)'; msg = '¡Superado!'; }
+                    else if (porc > 90) { col = 'var(--danger)'; msg = '¡Cerca!'; }
+                    else if (porc > 70) { col = 'var(--warning)'; msg = 'Cuidado'; }
+                    return `<div style="background:var(--bg);padding:15px;border-radius:10px;margin-bottom:10px;position:relative;">
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:6px;">
+                            <button class="btn-info" onclick="app.editarPresupuesto('${cat}')" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
+                            <button class="btn-danger" onclick="app.eliminarPresupuesto('${cat}')" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;font-size:13px;padding-right:100px;"><strong>${ico} ${cat}</strong><div style="text-align:right;"><div>Gastado: <strong style="color:${col};">${this.formatearPesos(gast)}</strong></div><div style="font-size:11px;color:var(--text-light);">Límite: ${this.formatearPesos(lim)}</div></div></div><div class="progress-bar" style="height:24px;"><div class="progress-fill" style="width:${porc}%;background:${col};font-size:11px;">${porc.toFixed(0)}%</div></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;"><span style="color:${col};font-weight:600;">${msg}</span><span style="color:${disp>=0?'var(--success)':'var(--danger)'};font-weight:600;">${disp>=0?'Disponible:':'Excedido:'} ${this.formatearPesos(Math.abs(disp))}</span></div></div>`;
+                }).join('');
+            },
+            
+            
+            actualizarResumen() {
+                const mk = this.getMes();
+                const m = parseInt(document.getElementById('mesActual').value);
+                const a = parseInt(document.getElementById('anioActual').value);
+                
+                const ing = (this.datos.ing[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+                const fij = (this.datos.fij[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+                const varG = (this.datos.var[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+                const tar = this.calcularCuotasMes(new Date(a, m, 1));
+                const gast = fij + varG + tar;
+                const bal = ing - gast;
+                
+                const dTar = this.datos.tarjetas.reduce((s, t) => {
+                    const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
+                    return s + (cuotasRestantes * t.valorCuota);
+                }, 0);
+                const dPre = this.datos.prestamos.reduce((s, p) => {
+                    const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
+                    return s + (cuotasRestantes * p.valorCuota);
+                }, 0);
+                
+                document.getElementById('resumenCards').innerHTML = `
+                    <div class="card" style="background:linear-gradient(135deg,#2e7d32,#66bb6a);"><div class="card-title">Ingresos</div><div class="card-value">${this.formatearPesos(ing)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#d32f2f,#f44336);"><div class="card-title">Gastos Fijos</div><div class="card-value">${this.formatearPesos(fij)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#e64a19,#ff7043);"><div class="card-title">Gastos Variables</div><div class="card-value">${this.formatearPesos(varG)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#1565c0,#42a5f5);"><div class="card-title">Tarjetas</div><div class="card-value">${this.formatearPesos(dTar)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);"><div class="card-title">Préstamos</div><div class="card-value">${this.formatearPesos(dPre)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,${bal>=0?'#f57c00':'#c62828'},${bal>=0?'#ffb74d':'#ef5350'});"><div class="card-title">Balance</div><div class="card-value">${this.formatearPesos(bal)}</div></div>`;
+                
+                const max = Math.max(fij, varG, tar) || 1;
+                const total = fij + varG + tar;
+                
+                document.getElementById('desglose').innerHTML = `
+                    <div class="expense-card">
+                        <div class="expense-header">
+                            <span class="expense-title">Gastos Fijos</span>
+                            <span class="expense-icon">🏠</span>
+                        </div>
+                        <div class="expense-amount">${this.formatearPesos(fij)}</div>
+                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(fij/max)*100}%"></div></div>
+                        <div class="expense-percent">${total > 0 ? ((fij/total)*100).toFixed(1) : 0}% del total</div>
+                    </div>
+                    <div class="expense-card">
+                        <div class="expense-header">
+                            <span class="expense-title">Gastos Variables</span>
+                            <span class="expense-icon">🛒</span>
+                        </div>
+                        <div class="expense-amount">${this.formatearPesos(varG)}</div>
+                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(varG/max)*100}%"></div></div>
+                        <div class="expense-percent">${total > 0 ? ((varG/total)*100).toFixed(1) : 0}% del total</div>
+                    </div>
+                    <div class="expense-card">
+                        <div class="expense-header">
+                            <span class="expense-title">Cuotas (Tarjetas + Préstamos)</span>
+                            <span class="expense-icon">💳</span>
+                        </div>
+                        <div class="expense-amount">${this.formatearPesos(tar)}</div>
+                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(tar/max)*100}%"></div></div>
+                        <div class="expense-percent">${total > 0 ? ((tar/total)*100).toFixed(1) : 0}% del total</div>
+                    </div>
+                `;
+                
+                this.alertas(mk, ing, gast, bal, fij, varG);
+            },
+            
+            alertas(mk, ing, gast, bal, fij, varG) {
+                const al = [];
+                if (gast > ing * 0.9 && ing > 0) al.push('<div class="alert alert-warning"><strong>⚠️ Alto nivel de gastos</strong><br>Tus gastos superan el 90% de tus ingresos.</div>');
+                if (bal < 0) al.push('<div class="alert alert-danger"><strong>🚨 Balance negativo</strong><br>Estás gastando más de lo que ingresas este mes.</div>');
+                
+                const pres = this.datos.pres[mk] || {};
+                const vars = this.datos.var[mk] || [];
+                const gCat = {};
+                vars.forEach(v => {
+                    const montoARS = this.convertirARS(v.monto, v.moneda || 'ARS');
+                    gCat[v.cat] = (gCat[v.cat] || 0) + montoARS;
+                });
+                Object.entries(pres).forEach(([cat, lim]) => {
+                    if ((gCat[cat] || 0) > lim) {
+                        al.push(`<div class="alert alert-warning"><strong>⚠️ Presupuesto superado</strong><br>${cat}: excediste por ${this.formatearPesos((gCat[cat]||0) - lim)}</div>`);
+                    }
+                });
+                
+                const tarVenc = this.datos.tarjetas.filter(t => {
+                    const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
+                    return cuotasRestantes > 0 && cuotasRestantes <= 3;
+                });
+                if (tarVenc.length > 0) al.push(`<div class="alert alert-info"><strong>ℹ️ Cuotas finalizando</strong><br>${tarVenc.length} tarjeta(s) finalizan en ≤3 cuotas.</div>`);
+                
+                const preVenc = this.datos.prestamos.filter(p => {
+                    const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
+                    return cuotasRestantes > 0 && cuotasRestantes <= 3;
+                });
+                if (preVenc.length > 0) al.push(`<div class="alert alert-info"><strong>ℹ️ Préstamos finalizando</strong><br>${preVenc.length} préstamo(s) finalizan en ≤3 cuotas.</div>`);
+                
+                const metas = this.datos.metas[mk] || [];
+                const aho = this.datos.aho[mk] || [];
+                const metaT = metas.reduce((s, m) => s + m.monto, 0);
+                const ahoT = aho.reduce((s, a) => s + a.monto, 0);
+                if (metaT > 0 && ahoT < metaT * 0.5) al.push('<div class="alert alert-warning"><strong>⚠️ Meta de ahorro</strong><br>Llevas menos del 50% de tu meta de ahorro.</div>');
+                
+                const valoresVar = Object.values(this.datos.var);
+                if (valoresVar.length > 1) {
+                    const totales = valoresVar.map(mes => mes.reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0));
+                    const prom = totales.reduce((s, v) => s + v, 0) / totales.length;
+                    if (varG > prom * 1.5 && prom > 0) al.push('<div class="alert alert-warning"><strong>⚠️ Gasto inusual</strong><br>Tus gastos variables son 50% mayores al promedio.</div>');
+                }
+                
+                document.getElementById('alertas').innerHTML = al.length ? al.join('') : '<p style="text-align:center;color:var(--success);font-weight:700;font-size:14px;">✅ Todo en orden</p>';
+            },
+            
+            mostrarHist() {
+                const c = document.getElementById('listaHistorial');
+                if (this.datos.hist.length === 0) {
+                    c.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:30px;font-size:13px;">No hay actividad</p>';
+                    return;
+                }
+                c.innerHTML = this.datos.hist.slice(0, 30).map(h => `<div style="background:var(--bg);padding:14px;border-radius:8px;border-left:4px solid var(--primary);margin-bottom:10px;"><div style="font-size:11px;color:var(--text-light);margin-bottom:4px;">${h.fecha}</div><div style="font-size:13px;color:var(--text);">${h.txt}</div></div>`).join('');
+            },
+            
+            actualizar() {
+                this.actualizarResumen();
+                ['ing','fij','var'].forEach(t => this.mostrarLista(t));
+                this.mostrarTarjetas();
+                this.mostrarPrestamos();
+                this.mostrarAho();
+                this.mostrarPres();
+            },
+            
+            mostrarAyuda() {
+                document.getElementById('modalAyuda').style.display = 'block';
+            },
+            
+            cerrarAyuda() {
+                document.getElementById('modalAyuda').style.display = 'none';
+            },
+            
+            exportar() {
+                const json = JSON.stringify(this.datos, null, 2);
+                const blob = new Blob([json], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `auratech-finanzas-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('✅ Datos exportados correctamente');
+            },
+            
+            importar(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        if (confirm('⚠️ ¿Reemplazar TODOS los datos actuales?')) {
+                            this.datos = JSON.parse(ev.target.result);
+                            if (!this.datos.tipoCambio) this.datos.tipoCambio = 1350;
+                            document.getElementById('tipoCambio').value = this.datos.tipoCambio;
+                            this.guardar();
+                            this.actualizar();
+                            alert('✅ Datos importados correctamente');
+                        }
+                    } catch {
+                        alert('❌ Error al importar el archivo');
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            },
+            
+            guardar() {
+                try {
+                    const pin = localStorage.getItem('app_pin');
+                    if (!pin) {
+                        // Si no hay PIN todavía, guardar sin encriptar (solo durante setup)
+                        localStorage.setItem('auratech_datos', JSON.stringify(this.datos));
+                        return;
+                    }
+                    const datosJSON = JSON.stringify(this.datos);
+                    // Encriptar los datos usando el PIN como clave
+                    const datosEncriptados = CryptoJS.AES.encrypt(datosJSON, pin).toString();
+                    localStorage.setItem('auratech_datos', datosEncriptados);
+                } catch (error) {
+                    console.error('Error al guardar datos:', error);
+                    alert('⚠️ Error al guardar los datos. Intenta nuevamente.');
+                }
+            },
+            
+            cargarDatos() {
+                try {
+                    const guardado = localStorage.getItem('auratech_datos');
+                    if (guardado) {
+                        const pin = localStorage.getItem('app_pin');
+                        
+                        if (!pin) {
+                            // Si no hay PIN, cargar normalmente (solo durante setup inicial)
+                            this.datos = JSON.parse(guardado);
+                        } else {
+                            // Intentar desencriptar
+                            try {
+                                const bytes = CryptoJS.AES.decrypt(guardado, pin);
+                                const datosJSON = bytes.toString(CryptoJS.enc.Utf8);
+                                
+                                if (datosJSON) {
+                                    this.datos = JSON.parse(datosJSON);
+                                } else {
+                                    console.error('No se pudieron desencriptar los datos');
+                                }
+                            } catch (e) {
+                                // Si falla la desencriptación, puede ser que los datos no estén encriptados (migración)
+                                console.log('Intentando cargar datos sin encriptar (migración automática)');
+                                try {
+                                    this.datos = JSON.parse(guardado);
+                                    // Guardar ahora encriptado
+                                    this.guardar();
+                                    console.log('Datos migrados a formato encriptado');
+                                } catch (e2) {
+                                    console.error('Error al cargar datos:', e2);
+                                }
+                            }
+                        }
+                        
+                        if (!this.datos.tipoCambio) this.datos.tipoCambio = 1350;
+                        
+                        // Inicializar nuevas estructuras si no existen
+                        if (!this.datos.tarjetas) this.datos.tarjetas = [];
+                        if (!this.datos.prestamos) this.datos.prestamos = [];
+                        
+                        // Convertir fechas de string a Date
+                        this.datos.tarjetas.forEach(t => {
+                            if (t.fechaInicio) t.fechaInicio = new Date(t.fechaInicio);
+                        });
+                        this.datos.prestamos.forEach(p => {
+                            if (p.fechaInicio) p.fechaInicio = new Date(p.fechaInicio);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error general al cargar datos:', error);
+                }
+            }
+        };
+        
+        window.onclick = (e) => {
+            if (e.target == document.getElementById('modalAyuda')) app.cerrarAyuda();
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            // Ocultar la app hasta ingresar PIN
+            document.querySelector('.container').style.display = 'none';
+            pinManager.init();
+        });
+    </script>
+    
+    <!-- Librería de encriptación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+    // Carrusel con scroll y activación automática del submenú centrado
+    function autoActivateSubtabOnScroll(subtabsId) {
+        const subtabs = document.getElementById(subtabsId);
+        let ticking = false;
+        if (!subtabs) return;
+        subtabs.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const subtabsRect = subtabs.getBoundingClientRect();
+                    let closest, minDist = Infinity;
+                    subtabs.querySelectorAll('.subtab').forEach(subtab => {
+                        const rect = subtab.getBoundingClientRect();
+                        // Distancia del centro de la subtab al centro del carrusel
+                        const dist = Math.abs(rect.left + rect.width/2 - (subtabsRect.left + subtabsRect.width/2));
+                        if (dist < minDist) {
+                            closest = subtab; minDist = dist;
+                        }
+                    });
+                    if (closest && !closest.classList.contains('active')) closest.click(); // dispara el cambio de submenú
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    }
+    // Asociar al init del app (por cada subtabs que se active dinámicamente)
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(()=>{
+        document.querySelectorAll('.subtabs').forEach(sub => {
+          autoActivateSubtabOnScroll(sub.id);
+          // Si el tooltip no está, lo agrega
+          if(!sub.nextElementSibling || !sub.nextElementSibling.classList.contains('subtabs-tooltip')){
+            const tt = document.createElement('div');
+            tt.className = 'subtabs-tooltip';
+            tt.innerText = 'Desliza para ver más opciones';
+            sub.parentNode.insertBefore(tt, sub.nextSibling);
+          }
+        });
+      }, 150);
+    });
+    </script>
+    <script>
+    function setupCarruselYTooltipSubtabs(){
+      document.querySelectorAll('.subtabs').forEach(sub => {
+        // Elimina tooltips previos mal colocados (si los hay)
+        if(sub.previousElementSibling && sub.previousElementSibling.classList.contains('subtabs-tooltip')){
+          sub.previousElementSibling.remove();
+        }
+        // Inserta el tooltip justo antes del carrusel
+        const tt = document.createElement('div');
+        tt.className = 'subtabs-tooltip';
+        tt.innerText = 'Desliza para ver más opciones';
+        sub.parentNode.insertBefore(tt, sub);
+        // --- Scroll autoactivador solo si no existe ya
+        if(!sub._autoScrollSetup){
+          sub._autoScrollSetup = true;
+          sub.addEventListener('scroll', function() {
+            if(sub._ticking) return;
+            sub._ticking = true;
+            window.requestAnimationFrame(() => {
+              const subtabsRect = sub.getBoundingClientRect();
+              let closest, minDist = Infinity;
+              sub.querySelectorAll('.subtab').forEach(subtab => {
+                const rect = subtab.getBoundingClientRect();
+                const dist = Math.abs(rect.left + rect.width/2 - (subtabsRect.left + subtabsRect.width/2));
+                if (dist < minDist) { closest = subtab; minDist = dist; }
+              });
+              if (closest && !closest.classList.contains('active')) closest.click();
+              sub._ticking = false;
+            });
+          });
+        }
+      });
+    }
+    document.addEventListener('DOMContentLoaded', setupCarruselYTooltipSubtabs);
+    // Se recomienda llamar a setupCarruselYTooltipSubtabs() justo después de rearmar los subtabs, si son dinámicos.
+    </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script type="module" src="./js/app.js"></script>
+
+  <script type="module">
+    import './js/auth.js';
+    import './js/arg-data.js';
+    import './js/calculations.js';
+    // componentes dinámicos
+    // informes se importará cuando sea llamado para no bloquear inicio
+  </script>
+
+</body>
+</html>

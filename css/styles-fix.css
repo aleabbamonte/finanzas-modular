@@ -1,0 +1,56 @@
+/* styles-fix.css - Mejoras visuales para Finanzas Pro */
+
+/* --- Scroll con tope suave entre secciones (tabs y subtabs) --- */
+.tabs {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.tab {
+  scroll-snap-align: start;
+}
+
+.subtabs {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.subtab {
+  scroll-snap-align: start;
+}
+
+/* --- Pequeño tope visual entre categorías --- */
+.tab {
+  margin-right: 12px;
+}
+
+/* --- Ajuste del logo con variable global --- */
+:root {
+  --logo-width: 120px;
+}
+
+.header .logo {
+  width: var(--logo-width);
+  height: auto;
+  transition: width 0.3s ease;
+}
+
+/* --- Hover suave (solo visible en desktop) --- */
+@media (hover: hover) {
+  .header .logo:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* --- Desktop: layout estático sin scroll horizontal --- */
+@media (min-width: 1024px) {
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .tab {
+    margin-right: 0;
+  }
+}
