@@ -3,6 +3,98 @@ import { formatearPesos, parseMonto, attachCurrencyFormatters } from './formatte
 import { guardarDatos, cargarDatos, exportarJSON } from './storage.js';
 import { setupPinAutoInit } from './pin.js';
 
+// ========== SISTEMA DE PIN ==========
+const pinManager = {
+    currentPin: '',
+    storedPin: null,
+    confirmPin: '',
+    mode: 'setup',
+    
+    init() {
+        this.storedPin = localStorage.getItem('app_pin');
+        if (this.storedPin) {
+            this.mode = 'login';
+            document.getElementById('pinTitle').textContent = 'Ingresa tu PIN';
+            document.getElementById('pinSubtitle').textContent = 'Desbloquea tu app financiera';
+        } else {
+            this.mode = 'setup';
+            document.getElementById('pinTitle').textContent = 'Configura tu PIN';
+            document.getElementById('pinSubtitle').textContent = 'Crea un PIN de 4 dígitos para proteger tus datos';
+        }
+    },
+    
+    addDigit(digit) {
+        if (this.currentPin.length < 4) {
+            this.currentPin += digit;
+            this.updateDots();
+            if (this.currentPin.length === 4) {
+                setTimeout(() => this.processPin(), 300);
+            }
+        }
+    },
+    
+    deleteDigit() {
+        this.currentPin = this.currentPin.slice(0, -1);
+        this.updateDots();
+        document.getElementById('pinError').textContent = '';
+    },
+    
+    updateDots() {
+        const dots = document.querySelectorAll('.pin-dot');
+        dots.forEach((dot, index) => {
+            if (index < this.currentPin.length) {
+                dot.classList.add('filled');
+            } else {
+                dot.classList.remove('filled');
+            }
+        });
+    },
+    
+    processPin() {
+        if (this.mode === 'setup') {
+            this.confirmPin = this.currentPin;
+            this.currentPin = '';
+            this.mode = 'confirm';
+            document.getElementById('pinTitle').textContent = 'Confirma tu PIN';
+            document.getElementById('pinSubtitle').textContent = 'Ingresa nuevamente el PIN';
+            this.updateDots();
+        } else if (this.mode === 'confirm') {
+            if (this.currentPin === this.confirmPin) {
+                localStorage.setItem('app_pin', this.currentPin);
+                this.unlockApp();
+            } else {
+                document.getElementById('pinError').textContent = '❌ Los PINs no coinciden. Intenta de nuevo.';
+                this.currentPin = '';
+                this.confirmPin = '';
+                this.mode = 'setup';
+                document.getElementById('pinTitle').textContent = 'Configura tu PIN';
+                document.getElementById('pinSubtitle').textContent = 'Crea un PIN de 4 dígitos';
+                setTimeout(() => {
+                    this.updateDots();
+                    document.getElementById('pinError').textContent = '';
+                }, 2000);
+            }
+        } else if (this.mode === 'login') {
+            if (this.currentPin === this.storedPin) {
+                this.unlockApp();
+            } else {
+                document.getElementById('pinError').textContent = '❌ PIN incorrecto';
+                this.currentPin = '';
+                setTimeout(() => {
+                    this.updateDots();
+                    document.getElementById('pinError').textContent = '';
+                }, 1500);
+            }
+        }
+    },
+    
+    unlockApp() {
+        document.getElementById('pinScreen').style.display = 'none';
+        document.querySelector('.container').style.display = 'block';
+        app.init();
+    }
+};
+
 const app = {
             meses: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
             cat: {
@@ -29,104 +121,7 @@ const app = {
             activeSub: null,
             datos: { ing:{}, fij:{}, var:{}, tarjetas:[], prestamos:[], metas:{}, aho:{}, pres:{}, hist:[], tipoCambio: 1350 },
             editando: { activo: false, tipo: null, indice: null },
-            
-            formatearPesos(num) {
-                const s = new Intl.NumberFormat('es-AR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }).format(num);
-                return `$ ${s}`;
-            },
-            
-            // Convierte un string como "$ 1.234,56" a número 1234.56
-            parseMonto(str) {
-                if (str == null) return NaN;
-                const limpio = String(str)
-                    .replace(/[^0-9,.-]/g, '') // quita símbolo, espacios, etc.
-                    .replace(/\./g, '')        // quita puntos de miles
-                    .replace(/,/g, '.');        // cambia coma decimal por punto
-                const n = parseFloat(limpio);
-                return isNaN(n) ? NaN : n;
-            },
-            
-            // Formatea con "$ " + puntos de miles y coma decimal
-            formatearPesosConSimbolo(num) {
-                if (num == null || isNaN(num)) return '';
-                return this.formatearPesos(num);
-            },
-            
-            // Agrega formateo a los inputs de monto (focus/blur)
-            attachCurrencyFormatters() {
-                const ids = [
-                    'ing-monto','fij-monto','var-monto',
-                    'tarjeta-monto','tarjeta-cuota-rapido',
-                    'prestamo-monto','prestamo-cuota-rapido',
-                    'meta-monto','aho-monto','pres-monto'
-                ];
-                const formatLive = (raw) => {
-                    if (raw == null) return '';
-                    // Quitar símbolo y espacios
-                    let s = String(raw).replace(/\s|\$/g, '');
-                    // Permitir dígitos y coma; quitar puntos (siempre miles) y otros
-                    s = s.replace(/\./g, '');
-                    s = s.replace(/[^0-9,\-]/g, '');
-                    // Separar por coma (único separador decimal válido en vivo)
-                    const lastComma = s.lastIndexOf(',');
-                    let entero = lastComma >= 0 ? s.slice(0, lastComma) : s;
-                    let dec = lastComma >= 0 ? s.slice(lastComma + 1) : '';
-                    // Limpiar signos/ruido
-                    const neg = entero.startsWith('-');
-                    if (neg) entero = entero.slice(1);
-                    entero = entero.replace(/[^0-9]/g, '');
-                    dec = dec.replace(/[^0-9]/g, '').slice(0, 2);
-                    // Limitar a 9 dígitos enteros (hasta 900.000.000)
-                    if (entero.length > 9) entero = entero.slice(0, 9);
-                    // Eliminar ceros a la izquierda excepto si todo es 0
-                    entero = entero.replace(/^0+(\d)/, '$1');
-                    // Agrupar miles con punto
-                    const withThousands = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                    const base = (neg ? '-' : '') + withThousands;
-                    if (!base && !dec) return '';
-                    return dec.length ? `$ ${base},${dec}` : `$ ${base}`;
-                };
-                const setFormattedWithCaret = (input) => {
-                    const prev = input.value;
-                    const selStart = input.selectionStart || 0;
-                    // Contar dígitos antes del caret
-                    const digitsBefore = (prev.slice(0, selStart).match(/\d/g) || []).length;
-                    const formatted = formatLive(prev);
-                    input.value = formatted;
-                    // Posicionar caret al mismo conteo de dígitos
-                    let count = 0;
-                    let newPos = formatted.length;
-                    for (let i = 0; i < formatted.length; i++) {
-                        if (/\d/.test(formatted[i])) count++;
-                        if (count >= digitsBefore) { newPos = i + 1; break; }
-                    }
-                    try { input.setSelectionRange(newPos, newPos); } catch {}
-                };
-                ids.forEach(id => {
-                    const input = document.getElementById(id);
-                    if (!input) return;
-                    // Al enfocar: mostrar valor crudo editable (con punto decimal)
-                    input.addEventListener('focus', () => {
-                        const val = this.parseMonto(input.value);
-                        input.value = isNaN(val) ? '' : String(val);
-                    });
-                    // Mientras escribe: formateo en vivo con preservación de cursor (ligero)
-                    input.addEventListener('input', (e) => {
-                        // Permitir borrar completo
-                        if (!input.value) return;
-                        setFormattedWithCaret(input);
-                    });
-                    // Al salir: formatear con símbolo y separadores
-                    input.addEventListener('blur', () => {
-                        const val = this.parseMonto(input.value);
-                        input.value = isNaN(val) ? '' : this.formatearPesosConSimbolo(val);
-                    });
-                });
-            },
-            
+                                   
             convertirARS(monto, moneda) {
                 if (moneda === 'USD') {
                     return monto * this.datos.tipoCambio;
@@ -208,7 +203,12 @@ const app = {
                 this.cargarDatos();
                 document.getElementById('tipoCambio').value = this.datos.tipoCambio;
                 this.actualizar();
-                this.attachCurrencyFormatters();
+                attachCurrencyFormatters([
+                'ing-monto','fij-monto','var-monto',
+                'tarjeta-monto','tarjeta-cuota-rapido',
+                'prestamo-monto','prestamo-cuota-rapido',
+                'meta-monto','aho-monto','pres-monto'
+                ]);
                 // Fuerza el tab inicial, eliminando tooltips fuera de contexto
                 const tabsC = document.getElementById('tabsContainer');
                 if(tabsC && tabsC.children.length > 0){
@@ -360,7 +360,7 @@ llenarSelects() {
             
             add(tipo) {
                 const nom = document.getElementById(`${tipo}-nombre`).value;
-                const monto = this.parseMonto(document.getElementById(`${tipo}-monto`).value);
+                const monto = parseMonto(document.getElementById(`${tipo}-monto`).value);
                 const cat = document.getElementById(`${tipo}-cat`).value;
                 const col = document.getElementById(`${tipo}-color`).value;
                 const moneda = document.getElementById(`${tipo}-moneda`).value;
@@ -372,13 +372,13 @@ llenarSelects() {
                 if (this.editando.activo && this.editando.tipo === tipo) {
                     this.datos[tipo][mk][this.editando.indice] = {nom, monto, cat, col, moneda};
                     const montoARS = this.convertirARS(monto, moneda);
-                    this.addHist(`Editado ${tipo}: ${nom} - ${this.formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
+                    this.addHist(`Editado ${tipo}: ${nom} - ${formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
                     this.cancelarEdicion(tipo);
                 } else {
                     // Modo agregar normal
                     this.datos[tipo][mk].push({nom, monto, cat, col, moneda});
                     const montoARS = this.convertirARS(monto, moneda);
-                    this.addHist(`${tipo}: ${nom} - ${this.formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
+                    this.addHist(`${tipo}: ${nom} - ${formatearPesos(montoARS)}${moneda==='USD'?' (USD)':''}`);
                     document.getElementById(`${tipo}-nombre`).value = '';
                     document.getElementById(`${tipo}-monto`).value = '';
                 }
@@ -477,7 +477,7 @@ llenarSelects() {
             agregarTarjetaCompleto() {
                 const nombre = document.getElementById('tarjeta-nombre').value;
                 const tarjeta = document.getElementById('tarjeta-tarjeta').value;
-                const monto = this.parseMonto(document.getElementById('tarjeta-monto').value);
+                const monto = parseMonto(document.getElementById('tarjeta-monto').value);
                 const cuotas = parseInt(document.getElementById('tarjeta-cuotas').value);
                 const fecha = document.getElementById('tarjeta-fecha').value;
                 
@@ -494,7 +494,7 @@ llenarSelects() {
                     fechaInicio: new Date(fecha)
                 });
                 
-                this.addHist(`Tarjeta agregada: ${nombre} - ${cuotas} cuotas de ${this.formatearPesos(monto / cuotas)}`);
+                this.addHist(`Tarjeta agregada: ${nombre} - ${cuotas} cuotas de ${formatearPesos(monto / cuotas)}`);
                 
                 document.getElementById('tarjeta-nombre').value = '';
                 document.getElementById('tarjeta-tarjeta').value = '';
@@ -509,7 +509,7 @@ llenarSelects() {
             agregarTarjetaRapido() {
                 const nombre = document.getElementById('tarjeta-nombre-rapido').value;
                 const tarjeta = document.getElementById('tarjeta-tarjeta-rapido').value;
-                const cuota = this.parseMonto(document.getElementById('tarjeta-cuota-rapido').value);
+                const cuota = parseMonto(document.getElementById('tarjeta-cuota-rapido').value);
                 const cuotas = parseInt(document.getElementById('tarjeta-cuotas-rapido').value);
                 const actual = parseInt(document.getElementById('tarjeta-actual-rapido').value);
                 
@@ -562,13 +562,13 @@ llenarSelects() {
                         <div class="item">
                             <div class="item-info">
                                 <div class="item-name">💳 ${t.nombre}</div>
-                                <small style="color:var(--text-light);font-size:11px;">${t.tarjeta} | Cuota: ${this.formatearPesos(t.valorCuota)}</small>
+                                <small style="color:var(--text-light);font-size:11px;">${t.tarjeta} | Cuota: ${formatearPesos(t.valorCuota)}</small>
                             </div>
                             <div style="text-align:center;">
                                 <strong>${t.cuotaActual}/${t.totalCuotas}</strong><br>
                                 <small style="font-size:10px;">cuotas</small>
                             </div>
-                            <div style="color:var(--danger);font-weight:700;">${this.formatearPesos(saldoTotal)}</div>
+                            <div style="color:var(--danger);font-weight:700;">${formatearPesos(saldoTotal)}</div>
                             <span class="badge ${cuotasRestantes === 0 ? 'badge-success' : 'badge-warning'}">${cuotasRestantes === 0 ? 'Pagado' : 'Activo'}</span>
                             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                 ${cuotasRestantes > 0 ? `<button class="btn btn-success" onclick="app.avanzarCuotaTarjeta(${i})">✓ Pagar</button>` : ''}
@@ -615,7 +615,7 @@ llenarSelects() {
             agregarPrestamoCompleto() {
                 const nombre = document.getElementById('prestamo-nombre').value;
                 const entidad = document.getElementById('prestamo-tipo').value;
-                const monto = this.parseMonto(document.getElementById('prestamo-monto').value);
+                const monto = parseMonto(document.getElementById('prestamo-monto').value);
                 const cuotas = parseInt(document.getElementById('prestamo-cuotas').value);
                 const fecha = document.getElementById('prestamo-fecha').value;
                 
@@ -632,7 +632,7 @@ llenarSelects() {
                     fechaInicio: new Date(fecha)
                 });
                 
-                this.addHist(`Préstamo agregado: ${nombre} - ${cuotas} cuotas de ${this.formatearPesos(monto / cuotas)}`);
+                this.addHist(`Préstamo agregado: ${nombre} - ${cuotas} cuotas de ${formatearPesos(monto / cuotas)}`);
                 
                 document.getElementById('prestamo-nombre').value = '';
                 document.getElementById('prestamo-tipo').value = '';
@@ -647,7 +647,7 @@ llenarSelects() {
             agregarPrestamoRapido() {
                 const nombre = document.getElementById('prestamo-nombre-rapido').value;
                 const entidad = document.getElementById('prestamo-tipo-rapido').value;
-                const cuota = this.parseMonto(document.getElementById('prestamo-cuota-rapido').value);
+                const cuota = parseMonto(document.getElementById('prestamo-cuota-rapido').value);
                 const cuotas = parseInt(document.getElementById('prestamo-cuotas-rapido').value);
                 const actual = parseInt(document.getElementById('prestamo-actual-rapido').value);
                 
@@ -699,13 +699,13 @@ llenarSelects() {
                         <div class="item">
                             <div class="item-info">
                                 <div class="item-name">🏦 ${p.nombre}</div>
-                                <small style="color:var(--text-light);font-size:11px;">${p.entidad} | Cuota: ${this.formatearPesos(p.valorCuota)}</small>
+                                <small style="color:var(--text-light);font-size:11px;">${p.entidad} | Cuota: ${formatearPesos(p.valorCuota)}</small>
                             </div>
                             <div style="text-align:center;">
                                 <strong>${p.cuotaActual}/${p.totalCuotas}</strong><br>
                                 <small style="font-size:10px;">cuotas</small>
                             </div>
-                            <div style="color:var(--danger);font-weight:700;">${this.formatearPesos(saldoTotal)}</div>
+                            <div style="color:var(--danger);font-weight:700;">${formatearPesos(saldoTotal)}</div>
                             <span class="badge ${cuotasRestantes === 0 ? 'badge-success' : 'badge-warning'}">${cuotasRestantes === 0 ? 'Pagado' : 'Activo'}</span>
                             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                 ${cuotasRestantes > 0 ? `<button class="btn btn-success" onclick="app.avanzarCuotaPrestamo(${i})">✓ Pagar</button>` : ''}
@@ -737,7 +737,7 @@ llenarSelects() {
             
             addMeta() {
                 const nom = document.getElementById('meta-nombre').value;
-                const monto = this.parseMonto(document.getElementById('meta-monto').value);
+                const monto = parseMonto(document.getElementById('meta-monto').value);
                 if (!nom || !monto) return alert('⚠️ Completa los campos');
                 const mk = this.getMes();
                 if (!this.datos.metas[mk]) this.datos.metas[mk] = [];
@@ -794,7 +794,7 @@ llenarSelects() {
             
             addAhorro() {
                 const nom = document.getElementById('aho-nombre').value;
-                const monto = this.parseMonto(document.getElementById('aho-monto').value);
+                const monto = parseMonto(document.getElementById('aho-monto').value);
                 if (!nom || !monto) return alert('⚠️ Completa los campos');
                 const mk = this.getMes();
                 if (!this.datos.aho[mk]) this.datos.aho[mk] = [];
@@ -807,7 +807,7 @@ llenarSelects() {
             
             addPresupuesto() {
                 const cat = document.getElementById('pres-cat').value;
-                const monto = this.parseMonto(document.getElementById('pres-monto').value);
+                const monto = parseMonto(document.getElementById('pres-monto').value);
                 if (!cat || !monto) return alert('⚠️ Completa los campos');
                 const mk = this.getMes();
                 if (!this.datos.pres[mk]) this.datos.pres[mk] = {};
@@ -908,7 +908,7 @@ llenarSelects() {
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 15px;">
-                                    <div style="font-size: 20px; font-weight: 700;">${this.formatearPesos(totalCat)}</div>
+                                    <div style="font-size: 20px; font-weight: 700;">${formatearPesos(totalCat)}</div>
                                     <span id="arrow-${tipo}-${cat.replace(/\s+/g, '-')}" style="font-size: 18px; transition: transform 0.3s;">▼</span>
                                 </div>
                             </div>
@@ -925,7 +925,7 @@ llenarSelects() {
                                         <span>${it.nom}${badge}</span>
                                     </div>
                                 </div>
-                                <div class="item-amount">${this.formatearPesos(montoARS)}</div>
+                                <div class="item-amount">${formatearPesos(montoARS)}</div>
                                 <button class="btn btn-info" onclick="app.editar('${tipo}',${it.indiceOriginal})" style="padding: 8px 16px;" title="Editar">✏️</button>
                                 <button class="btn btn-danger" onclick="app.del('${tipo}',${it.indiceOriginal})" title="Eliminar">×</button>
                             </div>
@@ -965,7 +965,7 @@ llenarSelects() {
                     html += metas.map((m, i) => `
                         <div class="item">
                             <div style="flex:1;">${m.nom}</div>
-                            <div class="item-amount">${this.formatearPesos(m.monto)}</div>
+                            <div class="item-amount">${formatearPesos(m.monto)}</div>
                             <button class="btn-info" onclick="app.editarMeta(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
                             <button class="btn-danger" onclick="app.eliminarMeta(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
                         </div>
@@ -976,7 +976,7 @@ llenarSelects() {
                     html += aho.map((a, i) => `
                         <div class="item">
                             <div style="flex:1;">${a.nom}</div>
-                            <div class="item-amount">${this.formatearPesos(a.monto)}</div>
+                            <div class="item-amount">${formatearPesos(a.monto)}</div>
                             <button class="btn-info" onclick="app.editarAhorro(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
                             <button class="btn-danger" onclick="app.eliminarAhorro(${i})" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
                         </div>
@@ -993,7 +993,7 @@ llenarSelects() {
                 }
                 const porc = Math.min((ahoT / metaT) * 100, 100);
                 const diff = metaT - ahoT;
-                prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;"><span><strong>Meta:</strong> ${this.formatearPesos(metaT)}</span><span><strong>Ahorrado:</strong> ${this.formatearPesos(ahoT)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${porc}%">${porc.toFixed(0)}%</div></div><div style="text-align:center;margin-top:10px;color:${diff>0?'var(--danger)':'var(--success)'};font-weight:700;font-size:14px;">${diff>0?`Faltan ${this.formatearPesos(diff)}`:'¡Meta alcanzada! 🎉'}</div>`;
+                prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;"><span><strong>Meta:</strong> ${formatearPesos(metaT)}</span><span><strong>Ahorrado:</strong> ${formatearPesos(ahoT)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${porc}%">${porc.toFixed(0)}%</div></div><div style="text-align:center;margin-top:10px;color:${diff>0?'var(--danger)':'var(--success)'};font-weight:700;font-size:14px;">${diff>0?`Faltan ${formatearPesos(diff)}`:'¡Meta alcanzada! 🎉'}</div>`;
             },
             
             mostrarPres() {
@@ -1024,7 +1024,7 @@ llenarSelects() {
                             <button class="btn-info" onclick="app.editarPresupuesto('${cat}')" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Editar">✏️</button>
                             <button class="btn-danger" onclick="app.eliminarPresupuesto('${cat}')" style="padding:6px 10px;margin:0;font-size:12px;min-height:unset;" title="Eliminar">🗑️</button>
                         </div>
-                        <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;font-size:13px;padding-right:100px;"><strong>${ico} ${cat}</strong><div style="text-align:right;"><div>Gastado: <strong style="color:${col};">${this.formatearPesos(gast)}</strong></div><div style="font-size:11px;color:var(--text-light);">Límite: ${this.formatearPesos(lim)}</div></div></div><div class="progress-bar" style="height:24px;"><div class="progress-fill" style="width:${porc}%;background:${col};font-size:11px;">${porc.toFixed(0)}%</div></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;"><span style="color:${col};font-weight:600;">${msg}</span><span style="color:${disp>=0?'var(--success)':'var(--danger)'};font-weight:600;">${disp>=0?'Disponible:':'Excedido:'} ${this.formatearPesos(Math.abs(disp))}</span></div></div>`;
+                        <div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;font-size:13px;padding-right:100px;"><strong>${ico} ${cat}</strong><div style="text-align:right;"><div>Gastado: <strong style="color:${col};">${formatearPesos(gast)}</strong></div><div style="font-size:11px;color:var(--text-light);">Límite: ${formatearPesos(lim)}</div></div></div><div class="progress-bar" style="height:24px;"><div class="progress-fill" style="width:${porc}%;background:${col};font-size:11px;">${porc.toFixed(0)}%</div></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;"><span style="color:${col};font-weight:600;">${msg}</span><span style="color:${disp>=0?'var(--success)':'var(--danger)'};font-weight:600;">${disp>=0?'Disponible:':'Excedido:'} ${formatearPesos(Math.abs(disp))}</span></div></div>`;
                 }).join('');
             },
             
@@ -1051,12 +1051,12 @@ llenarSelects() {
                 }, 0);
                 
                 document.getElementById('resumenCards').innerHTML = `
-                    <div class="card" style="background:linear-gradient(135deg,#2e7d32,#66bb6a);"><div class="card-title">Ingresos</div><div class="card-value">${this.formatearPesos(ing)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#d32f2f,#f44336);"><div class="card-title">Gastos Fijos</div><div class="card-value">${this.formatearPesos(fij)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#e64a19,#ff7043);"><div class="card-title">Gastos Variables</div><div class="card-value">${this.formatearPesos(varG)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#1565c0,#42a5f5);"><div class="card-title">Tarjetas</div><div class="card-value">${this.formatearPesos(dTar)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);"><div class="card-title">Préstamos</div><div class="card-value">${this.formatearPesos(dPre)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,${bal>=0?'#f57c00':'#c62828'},${bal>=0?'#ffb74d':'#ef5350'});"><div class="card-title">Balance</div><div class="card-value">${this.formatearPesos(bal)}</div></div>`;
+                    <div class="card" style="background:linear-gradient(135deg,#2e7d32,#66bb6a);"><div class="card-title">Ingresos</div><div class="card-value">${formatearPesos(ing)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#d32f2f,#f44336);"><div class="card-title">Gastos Fijos</div><div class="card-value">${formatearPesos(fij)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#e64a19,#ff7043);"><div class="card-title">Gastos Variables</div><div class="card-value">${formatearPesos(varG)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#1565c0,#42a5f5);"><div class="card-title">Tarjetas</div><div class="card-value">${formatearPesos(dTar)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);"><div class="card-title">Préstamos</div><div class="card-value">${formatearPesos(dPre)}</div></div>
+                    <div class="card" style="background:linear-gradient(135deg,${bal>=0?'#f57c00':'#c62828'},${bal>=0?'#ffb74d':'#ef5350'});"><div class="card-title">Balance</div><div class="card-value">${formatearPesos(bal)}</div></div>`;
                 
                 const max = Math.max(fij, varG, tar) || 1;
                 const total = fij + varG + tar;
@@ -1067,7 +1067,7 @@ llenarSelects() {
                             <span class="expense-title">Gastos Fijos</span>
                             <span class="expense-icon">🏠</span>
                         </div>
-                        <div class="expense-amount">${this.formatearPesos(fij)}</div>
+                        <div class="expense-amount">${formatearPesos(fij)}</div>
                         <div class="expense-bar"><div class="expense-bar-fill" style="width:${(fij/max)*100}%"></div></div>
                         <div class="expense-percent">${total > 0 ? ((fij/total)*100).toFixed(1) : 0}% del total</div>
                     </div>
@@ -1076,7 +1076,7 @@ llenarSelects() {
                             <span class="expense-title">Gastos Variables</span>
                             <span class="expense-icon">🛒</span>
                         </div>
-                        <div class="expense-amount">${this.formatearPesos(varG)}</div>
+                        <div class="expense-amount">${formatearPesos(varG)}</div>
                         <div class="expense-bar"><div class="expense-bar-fill" style="width:${(varG/max)*100}%"></div></div>
                         <div class="expense-percent">${total > 0 ? ((varG/total)*100).toFixed(1) : 0}% del total</div>
                     </div>
@@ -1085,7 +1085,7 @@ llenarSelects() {
                             <span class="expense-title">Cuotas (Tarjetas + Préstamos)</span>
                             <span class="expense-icon">💳</span>
                         </div>
-                        <div class="expense-amount">${this.formatearPesos(tar)}</div>
+                        <div class="expense-amount">${formatearPesos(tar)}</div>
                         <div class="expense-bar"><div class="expense-bar-fill" style="width:${(tar/max)*100}%"></div></div>
                         <div class="expense-percent">${total > 0 ? ((tar/total)*100).toFixed(1) : 0}% del total</div>
                     </div>
@@ -1108,7 +1108,7 @@ llenarSelects() {
                 });
                 Object.entries(pres).forEach(([cat, lim]) => {
                     if ((gCat[cat] || 0) > lim) {
-                        al.push(`<div class="alert alert-warning"><strong>⚠️ Presupuesto superado</strong><br>${cat}: excediste por ${this.formatearPesos((gCat[cat]||0) - lim)}</div>`);
+                        al.push(`<div class="alert alert-warning"><strong>⚠️ Presupuesto superado</strong><br>${cat}: excediste por ${formatearPesos((gCat[cat]||0) - lim)}</div>`);
                     }
                 });
                 
@@ -1167,14 +1167,7 @@ llenarSelects() {
             },
             
             exportar() {
-                const json = JSON.stringify(this.datos, null, 2);
-                const blob = new Blob([json], {type: 'application/json'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `auratech-finanzas-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
+                exportarJSON(this.datos);
                 alert('✅ Datos exportados correctamente');
             },
             
@@ -1201,75 +1194,43 @@ llenarSelects() {
             },
             
             guardar() {
-                try {
-                    const pin = localStorage.getItem('app_pin');
-                    if (!pin) {
-                        // Si no hay PIN todavía, guardar sin encriptar (solo durante setup)
-                        localStorage.setItem('auratech_datos', JSON.stringify(this.datos));
-                        return;
-                    }
-                    const datosJSON = JSON.stringify(this.datos);
-                    // Encriptar los datos usando el PIN como clave
-                    const datosEncriptados = CryptoJS.AES.encrypt(datosJSON, pin).toString();
-                    localStorage.setItem('auratech_datos', datosEncriptados);
-                } catch (error) {
-                    console.error('Error al guardar datos:', error);
-                    alert('⚠️ Error al guardar los datos. Intenta nuevamente.');
-                }
+                const pin = pinManager.storedPin || null;
+                guardarDatos(this.datos, pin);
+                this.addHist('✅ Datos guardados');
             },
             
-            cargarDatos() {
-                try {
-                    const guardado = localStorage.getItem('auratech_datos');
-                    if (guardado) {
-                        const pin = localStorage.getItem('app_pin');
-                        
-                        if (!pin) {
-                            // Si no hay PIN, cargar normalmente (solo durante setup inicial)
-                            this.datos = JSON.parse(guardado);
-                        } else {
-                            // Intentar desencriptar
-                            try {
-                                const bytes = CryptoJS.AES.decrypt(guardado, pin);
-                                const datosJSON = bytes.toString(CryptoJS.enc.Utf8);
-                                
-                                if (datosJSON) {
-                                    this.datos = JSON.parse(datosJSON);
-                                } else {
-                                    console.error('No se pudieron desencriptar los datos');
-                                }
-                            } catch (e) {
-                                // Si falla la desencriptación, puede ser que los datos no estén encriptados (migración)
-                                console.log('Intentando cargar datos sin encriptar (migración automática)');
-                                try {
-                                    this.datos = JSON.parse(guardado);
-                                    // Guardar ahora encriptado
-                                    this.guardar();
-                                    console.log('Datos migrados a formato encriptado');
-                                } catch (e2) {
-                                    console.error('Error al cargar datos:', e2);
-                                }
-                            }
-                        }
-                        
-                        if (!this.datos.tipoCambio) this.datos.tipoCambio = 1350;
-                        
-                        // Inicializar nuevas estructuras si no existen
-                        if (!this.datos.tarjetas) this.datos.tarjetas = [];
-                        if (!this.datos.prestamos) this.datos.prestamos = [];
-                        
-                        // Convertir fechas de string a Date
-                        this.datos.tarjetas.forEach(t => {
-                            if (t.fechaInicio) t.fechaInicio = new Date(t.fechaInicio);
-                        });
-                        this.datos.prestamos.forEach(p => {
-                            if (p.fechaInicio) p.fechaInicio = new Date(p.fechaInicio);
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error general al cargar datos:', error);
-                }
-            }
+cargarDatos() {
+    try {
+        const pin = pinManager.storedPin || null;
+        const guardado = cargarDatos(pin);
+        
+        if (guardado) {
+            this.datos = guardado;
+            
+            // Asegurar que existan todas las estructuras
+            if (!this.datos.tipoCambio) this.datos.tipoCambio = 1350;
+            if (!this.datos.tarjetas) this.datos.tarjetas = [];
+            if (!this.datos.prestamos) this.datos.prestamos = [];
+            if (!this.datos.ing) this.datos.ing = {};
+            if (!this.datos.fij) this.datos.fij = {};
+            if (!this.datos.var) this.datos.var = {};
+            if (!this.datos.metas) this.datos.metas = {};
+            if (!this.datos.aho) this.datos.aho = {};
+            if (!this.datos.pres) this.datos.pres = {};
+            if (!this.datos.hist) this.datos.hist = [];
+            
+            // Convertir fechas de string a Date
+            this.datos.tarjetas.forEach(t => {
+                if (t.fechaInicio) t.fechaInicio = new Date(t.fechaInicio);
+            });
+            this.datos.prestamos.forEach(p => {
+                if (p.fechaInicio) p.fechaInicio = new Date(p.fechaInicio);
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+    }
+}
         }
 
 // enlazar funciones externas usadas en el original a las importadas
@@ -1295,3 +1256,18 @@ app.exportar = function() { exportarJSON(this.datos); };
 
 setupPinAutoInit();
 window.app = app;
+
+// Exponer app y pinManager globalmente
+window.app = app;
+window.pinManager = pinManager;
+
+// Inicializar cuando el DOM esté listo
+window.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.container').style.display = 'none';
+    pinManager.init();
+});
+
+// Click en el modal
+window.onclick = (e) => {
+    if (e.target == document.getElementById('modalAyuda')) app.cerrarAyuda();
+}
