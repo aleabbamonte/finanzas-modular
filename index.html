@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
   <meta name="theme-color" content="#00796b">
-  <title>Finanzas Pro | Auratech</title>
+  <title>Finanzas Pro | by Auratech™</title>
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="128x128" href="./img/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
   <link rel="stylesheet" href="./css/styles-fix.css">
@@ -457,84 +458,65 @@
     <!-- Librería de encriptación -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-    // Carrusel con scroll y activación automática del submenú centrado
-    function autoActivateSubtabOnScroll(subtabsId) {
-        const subtabs = document.getElementById(subtabsId);
-        let ticking = false;
-        if (!subtabs) return;
-        subtabs.addEventListener('scroll', function() {
-            if (!ticking) {
+// Script unificado para carrusel de subtabs
+function initSubtabs() {
+    document.querySelectorAll('.subtabs').forEach(sub => {
+        // Eliminar tooltips previos
+        if(sub.previousElementSibling?.classList.contains('subtabs-tooltip')){
+            sub.previousElementSibling.remove();
+        }
+        
+        // Crear tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'subtabs-tooltip';
+        tooltip.innerText = '💡 Deslizar horizontalmente para ver más opciones';
+        sub.parentNode.insertBefore(tooltip, sub);
+        
+        // Configurar scroll solo si no existe
+        if(!sub._scrollSetup){
+            sub._scrollSetup = true;
+            let ticking = false;
+            
+            sub.addEventListener('scroll', function() {
+                if(ticking) return;
+                ticking = true;
+                
                 window.requestAnimationFrame(() => {
-                    const subtabsRect = subtabs.getBoundingClientRect();
+                    const subtabsRect = sub.getBoundingClientRect();
                     let closest, minDist = Infinity;
-                    subtabs.querySelectorAll('.subtab').forEach(subtab => {
+                    
+                    sub.querySelectorAll('.subtab').forEach(subtab => {
                         const rect = subtab.getBoundingClientRect();
-                        // Distancia del centro de la subtab al centro del carrusel
                         const dist = Math.abs(rect.left + rect.width/2 - (subtabsRect.left + subtabsRect.width/2));
-                        if (dist < minDist) {
-                            closest = subtab; minDist = dist;
+                        if (dist < minDist) { 
+                            closest = subtab; 
+                            minDist = dist; 
                         }
                     });
-                    if (closest && !closest.classList.contains('active')) closest.click(); // dispara el cambio de submenú
+                    
+                    if (closest && !closest.classList.contains('active')) {
+                        closest.click();
+                    }
+                    
                     ticking = false;
                 });
-                ticking = true;
-            }
-        });
-    }
-    // Asociar al init del app (por cada subtabs que se active dinámicamente)
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(()=>{
-        document.querySelectorAll('.subtabs').forEach(sub => {
-          autoActivateSubtabOnScroll(sub.id);
-          // Si el tooltip no está, lo agrega
-          if(!sub.nextElementSibling || !sub.nextElementSibling.classList.contains('subtabs-tooltip')){
-            const tt = document.createElement('div');
-            tt.className = 'subtabs-tooltip';
-            tt.innerText = 'Desliza para ver más opciones';
-            sub.parentNode.insertBefore(tt, sub.nextSibling);
-          }
-        });
-      }, 150);
-    });
-    </script>
-    <script>
-    function setupCarruselYTooltipSubtabs(){
-      document.querySelectorAll('.subtabs').forEach(sub => {
-        // Elimina tooltips previos mal colocados (si los hay)
-        if(sub.previousElementSibling && sub.previousElementSibling.classList.contains('subtabs-tooltip')){
-          sub.previousElementSibling.remove();
-        }
-        // Inserta el tooltip justo antes del carrusel
-        const tt = document.createElement('div');
-        tt.className = 'subtabs-tooltip';
-        tt.innerText = 'Desliza para ver más opciones';
-        sub.parentNode.insertBefore(tt, sub);
-        // --- Scroll autoactivador solo si no existe ya
-        if(!sub._autoScrollSetup){
-          sub._autoScrollSetup = true;
-          sub.addEventListener('scroll', function() {
-            if(sub._ticking) return;
-            sub._ticking = true;
-            window.requestAnimationFrame(() => {
-              const subtabsRect = sub.getBoundingClientRect();
-              let closest, minDist = Infinity;
-              sub.querySelectorAll('.subtab').forEach(subtab => {
-                const rect = subtab.getBoundingClientRect();
-                const dist = Math.abs(rect.left + rect.width/2 - (subtabsRect.left + subtabsRect.width/2));
-                if (dist < minDist) { closest = subtab; minDist = dist; }
-              });
-              if (closest && !closest.classList.contains('active')) closest.click();
-              sub._ticking = false;
             });
-          });
         }
-      });
-    }
-    document.addEventListener('DOMContentLoaded', setupCarruselYTooltipSubtabs);
-    // Se recomienda llamar a setupCarruselYTooltipSubtabs() justo después de rearmar los subtabs, si son dinámicos.
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initSubtabs);
     </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script type="module" src="./js/app.js"></script>
+  <script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.log('[FinanzasPro] Service Worker registrado'))
+            .catch(err => console.warn('[FinanzasPro] Error al registrar SW:', err));
+    });
+}
+</script>
 </body>
 </html>
