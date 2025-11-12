@@ -95,6 +95,86 @@ const pinManager = {
     }
 };
 
+// ========== HELPERS DE UI ==========
+function crearCard(titulo, valor, gradiente) {
+    return `
+        <div class="card" style="background:linear-gradient(135deg,${gradiente});">
+            <div class="card-title">${titulo}</div>
+            <div class="card-value">${formatearPesos(valor)}</div>
+        </div>
+    `;
+}
+
+function crearItemLista(item, tipo, indiceOriginal, montoARS, badge = '') {
+    return `
+        <div class="item" style="background: var(--bg); margin-bottom: 6px; border-left: 4px solid ${item.col};">
+            <div class="item-info">
+                <div class="item-name">
+                    <span>${item.nom}${badge}</span>
+                </div>
+            </div>
+            <div class="item-amount">${formatearPesos(montoARS)}</div>
+            <button class="btn btn-info" onclick="app.editar('${tipo}',${indiceOriginal})" style="padding: 8px 16px;" title="Editar">✏️</button>
+            <button class="btn btn-danger" onclick="app.del('${tipo}',${indiceOriginal})" title="Eliminar">×</button>
+        </div>
+    `;
+}
+
+function crearHeaderCategoria(tipo, cat, ico, colorCat, totalCat, cantidadItems) {
+    const catId = `${tipo}-${cat.replace(/\s+/g, '-')}`;
+    return `
+        <div style="margin-bottom: 15px;">
+            <div class="category-header" onclick="app.toggleCategoria('${catId}')" style="background: ${colorCat}; color: white; padding: 14px 18px; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 22px;">${ico}</span>
+                    <div>
+                        <div style="font-weight: 700; font-size: 15px;">${cat}</div>
+                        <div style="font-size: 11px; opacity: 0.9;">${cantidadItems} registro${cantidadItems > 1 ? 's' : ''}</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 20px; font-weight: 700;">${formatearPesos(totalCat)}</div>
+                    <span id="arrow-${catId}" style="font-size: 18px; transition: transform 0.3s;">▼</span>
+                </div>
+            </div>
+            <div id="${catId}" class="category-items" style="display: none; margin-top: 8px; padding: 0 8px;">
+    `;
+}
+
+function crearExpenseCard(titulo, icono, monto, porcentajeMax, porcentajeTotal) {
+    return `
+        <div class="expense-card">
+            <div class="expense-header">
+                <span class="expense-title">${titulo}</span>
+                <span class="expense-icon">${icono}</span>
+            </div>
+            <div class="expense-amount">${formatearPesos(monto)}</div>
+            <div class="expense-bar"><div class="expense-bar-fill" style="width:${porcentajeMax}%"></div></div>
+            <div class="expense-percent">${porcentajeTotal}% del total</div>
+        </div>
+    `;
+}
+
+function crearAlerta(tipo, titulo, mensaje) {
+    const clases = {
+        'warning': 'alert-warning',
+        'danger': 'alert-danger',
+        'info': 'alert-info'
+    };
+    
+    const iconos = {
+        'warning': '⚠️',
+        'danger': '🚨',
+        'info': 'ℹ️'
+    };
+    
+    return `
+        <div class="alert ${clases[tipo]}">
+            <strong>${iconos[tipo]} ${titulo}</strong><br>${mensaje}
+        </div>
+    `;
+}
+
 const app = {
             meses: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
             cat: {
@@ -170,7 +250,7 @@ const app = {
                     alert(`✅ Dólar actualizado: $${valorVenta.toFixed(2)}`);
                     
                 } catch (error) {
-                    console.error('Error al actualizar dólar:', error);
+                    console.error('[FinanzasPro][App] Error al actualizar dólar:', error);
                     alert('❌ No se pudo obtener la cotización del dólar. Verifica tu conexión o ingrésalo manualmente.');
                     
                     // Restaurar botón
@@ -872,74 +952,45 @@ llenarSelects() {
             },
             
             mostrarLista(tipo) {
-                const mk = this.getMes();
-                const lista = this.datos[tipo][mk] || [];
-                const c = document.getElementById(`lista-${tipo}`);
-                if (lista.length === 0) {
-                    c.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;font-size:13px;">No hay registros</p>';
-                    return;
-                }
-                
-                // Agrupar por categoría
-                const porCategoria = {};
-                lista.forEach((it, idx) => {
-                    if (!porCategoria[it.cat]) {
-                        porCategoria[it.cat] = [];
-                    }
-                    porCategoria[it.cat].push({ ...it, indiceOriginal: idx });
-                });
-                
-                // Generar HTML agrupado
-                let html = '';
-                Object.keys(porCategoria).sort().forEach(cat => {
-                    const items = porCategoria[cat];
-                    const totalCat = items.reduce((sum, it) => sum + this.convertirARS(it.monto, it.moneda || 'ARS'), 0);
-                    const ico = this.cat[tipo].find(x => x.includes(cat))?.split(' ')[0] || '📌';
-                    const colorCat = items[0].col;
-                    
-                    html += `
-                        <div style="margin-bottom: 15px;">
-                            <div class="category-header" onclick="app.toggleCategoria('${tipo}-${cat.replace(/\s+/g, '-')}')" style="background: ${colorCat}; color: white; padding: 14px 18px; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 22px;">${ico}</span>
-                                    <div>
-                                        <div style="font-weight: 700; font-size: 15px;">${cat}</div>
-                                        <div style="font-size: 11px; opacity: 0.9;">${items.length} registro${items.length > 1 ? 's' : ''}</div>
-                                    </div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 15px;">
-                                    <div style="font-size: 20px; font-weight: 700;">${formatearPesos(totalCat)}</div>
-                                    <span id="arrow-${tipo}-${cat.replace(/\s+/g, '-')}" style="font-size: 18px; transition: transform 0.3s;">▼</span>
-                                </div>
-                            </div>
-                            <div id="${tipo}-${cat.replace(/\s+/g, '-')}" class="category-items" style="display: none; margin-top: 8px; padding: 0 8px;">
-                    `;
-                    
-                    items.forEach(it => {
-                        const montoARS = this.convertirARS(it.monto, it.moneda || 'ARS');
-                        const badge = it.moneda === 'USD' ? '<span class="currency-badge">USD</span>' : '';
-                        html += `
-                            <div class="item" style="background: var(--bg); margin-bottom: 6px; border-left: 4px solid ${colorCat};">
-                                <div class="item-info">
-                                    <div class="item-name">
-                                        <span>${it.nom}${badge}</span>
-                                    </div>
-                                </div>
-                                <div class="item-amount">${formatearPesos(montoARS)}</div>
-                                <button class="btn btn-info" onclick="app.editar('${tipo}',${it.indiceOriginal})" style="padding: 8px 16px;" title="Editar">✏️</button>
-                                <button class="btn btn-danger" onclick="app.del('${tipo}',${it.indiceOriginal})" title="Eliminar">×</button>
-                            </div>
-                        `;
-                    });
-                    
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                c.innerHTML = html;
-            },
+    const mk = this.getMes();
+    const lista = this.datos[tipo][mk] || [];
+    const c = document.getElementById(`lista-${tipo}`);
+    
+    if (lista.length === 0) {
+        c.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;font-size:13px;">No hay registros</p>';
+        return;
+    }
+    
+    // Agrupar por categoría
+    const porCategoria = {};
+    lista.forEach((it, idx) => {
+        if (!porCategoria[it.cat]) {
+            porCategoria[it.cat] = [];
+        }
+        porCategoria[it.cat].push({ ...it, indiceOriginal: idx });
+    });
+    
+    // Generar HTML agrupado
+    let html = '';
+    Object.keys(porCategoria).sort().forEach(cat => {
+        const items = porCategoria[cat];
+        const totalCat = items.reduce((sum, it) => sum + this.convertirARS(it.monto, it.moneda || 'ARS'), 0);
+        const ico = this.cat[tipo].find(x => x.includes(cat))?.split(' ')[0] || '📌';
+        const colorCat = items[0].col;
+        
+        html += crearHeaderCategoria(tipo, cat, ico, colorCat, totalCat, items.length);
+        
+        items.forEach(it => {
+            const montoARS = this.convertirARS(it.monto, it.moneda || 'ARS');
+            const badge = it.moneda === 'USD' ? '<span class="currency-badge">USD</span>' : '';
+            html += crearItemLista(it, tipo, it.indiceOriginal, montoARS, badge);
+        });
+        
+        html += '</div></div>';
+    });
+    
+    c.innerHTML = html;
+    },
             
             toggleCategoria(id) {
                 const elem = document.getElementById(id);
@@ -1028,117 +1079,113 @@ llenarSelects() {
                 }).join('');
             },
             
-            
             actualizarResumen() {
-                const mk = this.getMes();
-                const m = parseInt(document.getElementById('mesActual').value);
-                const a = parseInt(document.getElementById('anioActual').value);
-                
-                const ing = (this.datos.ing[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
-                const fij = (this.datos.fij[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
-                const varG = (this.datos.var[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
-                const tar = this.calcularCuotasMes(new Date(a, m, 1));
-                const gast = fij + varG + tar;
-                const bal = ing - gast;
-                
-                const dTar = this.datos.tarjetas.reduce((s, t) => {
-                    const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
-                    return s + (cuotasRestantes * t.valorCuota);
-                }, 0);
-                const dPre = this.datos.prestamos.reduce((s, p) => {
-                    const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
-                    return s + (cuotasRestantes * p.valorCuota);
-                }, 0);
-                
-                document.getElementById('resumenCards').innerHTML = `
-                    <div class="card" style="background:linear-gradient(135deg,#2e7d32,#66bb6a);"><div class="card-title">Ingresos</div><div class="card-value">${formatearPesos(ing)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#d32f2f,#f44336);"><div class="card-title">Gastos Fijos</div><div class="card-value">${formatearPesos(fij)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#e64a19,#ff7043);"><div class="card-title">Gastos Variables</div><div class="card-value">${formatearPesos(varG)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#1565c0,#42a5f5);"><div class="card-title">Tarjetas</div><div class="card-value">${formatearPesos(dTar)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc);"><div class="card-title">Préstamos</div><div class="card-value">${formatearPesos(dPre)}</div></div>
-                    <div class="card" style="background:linear-gradient(135deg,${bal>=0?'#f57c00':'#c62828'},${bal>=0?'#ffb74d':'#ef5350'});"><div class="card-title">Balance</div><div class="card-value">${formatearPesos(bal)}</div></div>`;
-                
-                const max = Math.max(fij, varG, tar) || 1;
-                const total = fij + varG + tar;
-                
-                document.getElementById('desglose').innerHTML = `
-                    <div class="expense-card">
-                        <div class="expense-header">
-                            <span class="expense-title">Gastos Fijos</span>
-                            <span class="expense-icon">🏠</span>
-                        </div>
-                        <div class="expense-amount">${formatearPesos(fij)}</div>
-                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(fij/max)*100}%"></div></div>
-                        <div class="expense-percent">${total > 0 ? ((fij/total)*100).toFixed(1) : 0}% del total</div>
-                    </div>
-                    <div class="expense-card">
-                        <div class="expense-header">
-                            <span class="expense-title">Gastos Variables</span>
-                            <span class="expense-icon">🛒</span>
-                        </div>
-                        <div class="expense-amount">${formatearPesos(varG)}</div>
-                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(varG/max)*100}%"></div></div>
-                        <div class="expense-percent">${total > 0 ? ((varG/total)*100).toFixed(1) : 0}% del total</div>
-                    </div>
-                    <div class="expense-card">
-                        <div class="expense-header">
-                            <span class="expense-title">Cuotas (Tarjetas + Préstamos)</span>
-                            <span class="expense-icon">💳</span>
-                        </div>
-                        <div class="expense-amount">${formatearPesos(tar)}</div>
-                        <div class="expense-bar"><div class="expense-bar-fill" style="width:${(tar/max)*100}%"></div></div>
-                        <div class="expense-percent">${total > 0 ? ((tar/total)*100).toFixed(1) : 0}% del total</div>
-                    </div>
-                `;
-                
-                this.alertas(mk, ing, gast, bal, fij, varG);
-            },
+    const mk = this.getMes();
+    const m = parseInt(document.getElementById('mesActual').value);
+    const a = parseInt(document.getElementById('anioActual').value);
+    
+    const ing = (this.datos.ing[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+    const fij = (this.datos.fij[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+    const varG = (this.datos.var[mk] || []).reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0);
+    const tar = this.calcularCuotasMes(new Date(a, m, 1));
+    const gast = fij + varG + tar;
+    const bal = ing - gast;
+    
+    const dTar = this.datos.tarjetas.reduce((s, t) => {
+        const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
+        return s + (cuotasRestantes * t.valorCuota);
+    }, 0);
+    const dPre = this.datos.prestamos.reduce((s, p) => {
+        const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
+        return s + (cuotasRestantes * p.valorCuota);
+    }, 0);
+    
+    // Cards de resumen
+    document.getElementById('resumenCards').innerHTML = 
+        crearCard('Ingresos', ing, '#2e7d32,#66bb6a') +
+        crearCard('Gastos Fijos', fij, '#d32f2f,#f44336') +
+        crearCard('Gastos Variables', varG, '#e64a19,#ff7043') +
+        crearCard('Tarjetas', dTar, '#1565c0,#42a5f5') +
+        crearCard('Préstamos', dPre, '#6a1b9a,#ab47bc') +
+        crearCard('Balance', bal, `${bal>=0?'#f57c00':'#c62828'},${bal>=0?'#ffb74d':'#ef5350'}`);
+    
+    // Distribución de gastos
+    const max = Math.max(fij, varG, tar) || 1;
+    const total = fij + varG + tar;
+    
+    document.getElementById('desglose').innerHTML = 
+        crearExpenseCard('Gastos Fijos', '🏠', fij, (fij/max)*100, total > 0 ? ((fij/total)*100).toFixed(1) : 0) +
+        crearExpenseCard('Gastos Variables', '🛒', varG, (varG/max)*100, total > 0 ? ((varG/total)*100).toFixed(1) : 0) +
+        crearExpenseCard('Cuotas (Tarjetas + Préstamos)', '💳', tar, (tar/max)*100, total > 0 ? ((tar/total)*100).toFixed(1) : 0);
+    
+    // Alertas
+    this.alertas(mk, ing, gast, bal, fij, varG);
+},
             
             alertas(mk, ing, gast, bal, fij, varG) {
-                const al = [];
-                if (gast > ing * 0.9 && ing > 0) al.push('<div class="alert alert-warning"><strong>⚠️ Alto nivel de gastos</strong><br>Tus gastos superan el 90% de tus ingresos.</div>');
-                if (bal < 0) al.push('<div class="alert alert-danger"><strong>🚨 Balance negativo</strong><br>Estás gastando más de lo que ingresas este mes.</div>');
-                
-                const pres = this.datos.pres[mk] || {};
-                const vars = this.datos.var[mk] || [];
-                const gCat = {};
-                vars.forEach(v => {
-                    const montoARS = this.convertirARS(v.monto, v.moneda || 'ARS');
-                    gCat[v.cat] = (gCat[v.cat] || 0) + montoARS;
-                });
-                Object.entries(pres).forEach(([cat, lim]) => {
-                    if ((gCat[cat] || 0) > lim) {
-                        al.push(`<div class="alert alert-warning"><strong>⚠️ Presupuesto superado</strong><br>${cat}: excediste por ${formatearPesos((gCat[cat]||0) - lim)}</div>`);
-                    }
-                });
-                
-                const tarVenc = this.datos.tarjetas.filter(t => {
-                    const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
-                    return cuotasRestantes > 0 && cuotasRestantes <= 3;
-                });
-                if (tarVenc.length > 0) al.push(`<div class="alert alert-info"><strong>ℹ️ Cuotas finalizando</strong><br>${tarVenc.length} tarjeta(s) finalizan en ≤3 cuotas.</div>`);
-                
-                const preVenc = this.datos.prestamos.filter(p => {
-                    const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
-                    return cuotasRestantes > 0 && cuotasRestantes <= 3;
-                });
-                if (preVenc.length > 0) al.push(`<div class="alert alert-info"><strong>ℹ️ Préstamos finalizando</strong><br>${preVenc.length} préstamo(s) finalizan en ≤3 cuotas.</div>`);
-                
-                const metas = this.datos.metas[mk] || [];
-                const aho = this.datos.aho[mk] || [];
-                const metaT = metas.reduce((s, m) => s + m.monto, 0);
-                const ahoT = aho.reduce((s, a) => s + a.monto, 0);
-                if (metaT > 0 && ahoT < metaT * 0.5) al.push('<div class="alert alert-warning"><strong>⚠️ Meta de ahorro</strong><br>Llevas menos del 50% de tu meta de ahorro.</div>');
-                
-                const valoresVar = Object.values(this.datos.var);
-                if (valoresVar.length > 1) {
-                    const totales = valoresVar.map(mes => mes.reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0));
-                    const prom = totales.reduce((s, v) => s + v, 0) / totales.length;
-                    if (varG > prom * 1.5 && prom > 0) al.push('<div class="alert alert-warning"><strong>⚠️ Gasto inusual</strong><br>Tus gastos variables son 50% mayores al promedio.</div>');
-                }
-                
-                document.getElementById('alertas').innerHTML = al.length ? al.join('') : '<p style="text-align:center;color:var(--success);font-weight:700;font-size:14px;">✅ Todo en orden</p>';
-            },
+    const al = [];
+    
+    // Alertas de gastos
+    if (gast > ing * 0.9 && ing > 0) {
+        al.push(crearAlerta('warning', 'Alto nivel de gastos', 'Tus gastos superan el 90% de tus ingresos.'));
+    }
+    if (bal < 0) {
+        al.push(crearAlerta('danger', 'Balance negativo', 'Estás gastando más de lo que ingresas este mes.'));
+    }
+    
+    // Alertas de presupuestos
+    const pres = this.datos.pres[mk] || {};
+    const vars = this.datos.var[mk] || [];
+    const gCat = {};
+    vars.forEach(v => {
+        const montoARS = this.convertirARS(v.monto, v.moneda || 'ARS');
+        gCat[v.cat] = (gCat[v.cat] || 0) + montoARS;
+    });
+    Object.entries(pres).forEach(([cat, lim]) => {
+        if ((gCat[cat] || 0) > lim) {
+            al.push(crearAlerta('warning', 'Presupuesto superado', `${cat}: excediste por ${formatearPesos((gCat[cat]||0) - lim)}`));
+        }
+    });
+    
+    // Alertas de tarjetas finalizando
+    const tarVenc = this.datos.tarjetas.filter(t => {
+        const cuotasRestantes = t.totalCuotas - t.cuotaActual + 1;
+        return cuotasRestantes > 0 && cuotasRestantes <= 3;
+    });
+    if (tarVenc.length > 0) {
+        al.push(crearAlerta('info', 'Cuotas finalizando', `${tarVenc.length} tarjeta(s) finalizan en ≤3 cuotas.`));
+    }
+    
+    // Alertas de préstamos finalizando
+    const preVenc = this.datos.prestamos.filter(p => {
+        const cuotasRestantes = p.totalCuotas - p.cuotaActual + 1;
+        return cuotasRestantes > 0 && cuotasRestantes <= 3;
+    });
+    if (preVenc.length > 0) {
+        al.push(crearAlerta('info', 'Préstamos finalizando', `${preVenc.length} préstamo(s) finalizan en ≤3 cuotas.`));
+    }
+    
+    // Alertas de metas de ahorro
+    const metas = this.datos.metas[mk] || [];
+    const aho = this.datos.aho[mk] || [];
+    const metaT = metas.reduce((s, m) => s + m.monto, 0);
+    const ahoT = aho.reduce((s, a) => s + a.monto, 0);
+    if (metaT > 0 && ahoT < metaT * 0.5) {
+        al.push(crearAlerta('warning', 'Meta de ahorro', 'Llevas menos del 50% de tu meta de ahorro.'));
+    }
+    
+    // Alerta de gasto inusual
+    const valoresVar = Object.values(this.datos.var);
+    if (valoresVar.length > 1) {
+        const totales = valoresVar.map(mes => mes.reduce((s, i) => s + this.convertirARS(i.monto, i.moneda || 'ARS'), 0));
+        const prom = totales.reduce((s, v) => s + v, 0) / totales.length;
+        if (varG > prom * 1.5 && prom > 0) {
+            al.push(crearAlerta('warning', 'Gasto inusual', 'Tus gastos variables son 50% mayores al promedio.'));
+        }
+    }
+    
+    document.getElementById('alertas').innerHTML = al.length ? al.join('') : '<p style="text-align:center;color:var(--success);font-weight:700;font-size:14px;">✅ Todo en orden</p>';
+},
             
             mostrarHist() {
                 const c = document.getElementById('listaHistorial');
@@ -1228,7 +1275,7 @@ cargarDatos() {
             });
         }
     } catch (error) {
-        console.error('Error al cargar datos:', error);
+        console.error('[FinanzasPro][App] Error al cargar datos:', error);
     }
 }
         }
@@ -1238,24 +1285,7 @@ app.formatearPesos = formatearPesos;
 app.parseMonto = parseMonto;
 app.attachCurrencyFormatters = () => attachCurrencyFormatters(['ing-monto','fij-monto','var-monto','tarjeta-monto','tarjeta-cuota-rapido','prestamo-monto','prestamo-cuota-rapido','meta-monto','aho-monto','pres-monto']);
 
-app.guardar = function() {
-  try {
-    const pin = localStorage.getItem('app_pin');
-    guardarDatos(this.datos, pin);
-  } catch(e) { console.error(e); }
-};
-
-app.cargarDatos = function() {
-  try {
-    const guardado = cargarDatos(localStorage.getItem('app_pin'));
-    if (guardado) this.datos = guardado;
-  } catch(e) { console.error(e); }
-};
-
-app.exportar = function() { exportarJSON(this.datos); };
-
 setupPinAutoInit();
-window.app = app;
 
 // Exponer app y pinManager globalmente
 window.app = app;
