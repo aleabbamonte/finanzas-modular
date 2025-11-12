@@ -64,7 +64,6 @@ export function cargarDatos(pin) {
 // El nombre del archivo incluye la fecha actual (ej: auratech-finanzas-2025-11-12.json)
 export function exportarJSON(datos) {
   try {
-    if (pin && !pin.trim()) pin = null;
     const json = JSON.stringify(datos, null, 2); // formato legible con sangría
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
